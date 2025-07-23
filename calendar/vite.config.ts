@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite';
 import { tanstackRouter } from '@tanstack/router-plugin/vite';
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ command, mode }) => ({
   plugins: [
     tanstackRouter({ 
       autoCodeSplitting: true,
@@ -23,6 +23,10 @@ export default defineConfig({
     target: 'es2022',
     minify: 'esbuild',
     sourcemap: true,
+    // Additional optimizations
+    outDir: 'dist',
+    emptyOutDir: true,
+    reportCompressedSize: true,
     rollupOptions: {
       output: {
         // Manual chunk splitting for better caching
@@ -89,4 +93,14 @@ export default defineConfig({
       'lucide-react',
     ],
   },
-});
+  // Environment-specific configurations
+  define: {
+    __APP_VERSION__: JSON.stringify(process.env.npm_package_version || '1.0.0'),
+    __BUILD_DATE__: JSON.stringify(new Date().toISOString()),
+    __DEV__: command === 'serve',
+  },
+  // CSS configuration
+  css: {
+    devSourcemap: mode === 'development',
+  },
+}));
