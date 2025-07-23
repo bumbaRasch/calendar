@@ -4,7 +4,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
-import type { EventInput, DateSelectArg, EventClickArg } from '@fullcalendar/core';
+import type { DateSelectArg, EventClickArg } from '@fullcalendar/core';
 import type { CalendarEvent } from '../types/event';
 import { EventCategory, EventPriority, EventStatus, eventUtils } from '../types/event';
 
