@@ -55,7 +55,7 @@ export interface CalendarEvent extends Omit<EventInput, 'id'> {
   start: string | Date;
   end?: string | Date;
   allDay?: boolean;
-  
+
   // Enhanced properties
   category: EventCategory;
   priority: EventPriority;
@@ -64,12 +64,12 @@ export interface CalendarEvent extends Omit<EventInput, 'id'> {
   location?: string;
   attendees?: string[];
   url?: string;
-  
+
   // Metadata
   createdAt: string;
   updatedAt: string;
   createdBy?: string;
-  
+
   // Recurrence (for future implementation)
   recurrence?: {
     frequency: 'daily' | 'weekly' | 'monthly' | 'yearly';
@@ -77,7 +77,7 @@ export interface CalendarEvent extends Omit<EventInput, 'id'> {
     endDate?: string;
     count?: number;
   };
-  
+
   // Notifications (for future implementation)
   reminders?: {
     type: 'email' | 'popup' | 'push';
@@ -259,7 +259,7 @@ export const eventUtils = {
    */
   toFullCalendarEvent: (event: CalendarEvent): EventInput => {
     const categoryConfig = CATEGORY_CONFIG[event.category];
-    
+
     return {
       id: event.id,
       title: event.title,
@@ -291,7 +291,7 @@ export const eventUtils = {
    */
   fromFullCalendarEvent: (event: EventInput): CalendarEvent => {
     const extendedProps = event.extendedProps || {};
-    
+
     return {
       id: event.id as string,
       title: event.title as string,
@@ -323,21 +323,27 @@ export const eventUtils = {
   /**
    * Format event time for display
    */
-  formatEventTime: (start: string | Date, end?: string | Date, allDay?: boolean): string => {
+  formatEventTime: (
+    start: string | Date,
+    end?: string | Date,
+    allDay?: boolean,
+  ): string => {
     if (allDay) return 'All day';
-    
+
     const startDate = new Date(start);
     const endDate = end ? new Date(end) : null;
-    
+
     const timeOptions: Intl.DateTimeFormatOptions = {
       hour: 'numeric',
       minute: '2-digit',
       hour12: true,
     };
-    
+
     const startTime = startDate.toLocaleTimeString('en-US', timeOptions);
-    const endTime = endDate ? endDate.toLocaleTimeString('en-US', timeOptions) : null;
-    
+    const endTime = endDate
+      ? endDate.toLocaleTimeString('en-US', timeOptions)
+      : null;
+
     return endTime ? `${startTime} - ${endTime}` : startTime;
   },
 

@@ -19,7 +19,7 @@ export const colors = {
     900: '#1e3a8a',
     950: '#172554',
   },
-  
+
   // Semantic Colors
   semantic: {
     success: '#22c55e',
@@ -27,7 +27,7 @@ export const colors = {
     error: '#ef4444',
     info: '#3b82f6',
   },
-  
+
   // Calendar-specific Colors
   calendar: {
     today: '#fef3c7',
@@ -39,7 +39,7 @@ export const colors = {
     selected: '#ddd6fe',
     selectedText: '#5b21b6',
   },
-  
+
   // Event Category Colors
   eventCategories: {
     work: '#3b82f6',
@@ -75,7 +75,7 @@ export const typography = {
       'monospace',
     ],
   },
-  
+
   fontSize: {
     xs: ['0.75rem', { lineHeight: '1rem' }],
     sm: ['0.875rem', { lineHeight: '1.25rem' }],
@@ -86,7 +86,7 @@ export const typography = {
     '3xl': ['1.875rem', { lineHeight: '2.25rem' }],
     '4xl': ['2.25rem', { lineHeight: '2.5rem' }],
   },
-  
+
   fontWeight: {
     light: '300',
     normal: '400',
@@ -99,31 +99,31 @@ export const typography = {
 // Spacing Scale
 export const spacing = {
   0: '0',
-  1: '0.25rem',   // 4px
-  2: '0.5rem',    // 8px
-  3: '0.75rem',   // 12px
-  4: '1rem',      // 16px
-  5: '1.25rem',   // 20px
-  6: '1.5rem',    // 24px
-  8: '2rem',      // 32px
-  10: '2.5rem',   // 40px
-  12: '3rem',     // 48px
-  16: '4rem',     // 64px
-  20: '5rem',     // 80px
-  24: '6rem',     // 96px
-  32: '8rem',     // 128px
+  1: '0.25rem', // 4px
+  2: '0.5rem', // 8px
+  3: '0.75rem', // 12px
+  4: '1rem', // 16px
+  5: '1.25rem', // 20px
+  6: '1.5rem', // 24px
+  8: '2rem', // 32px
+  10: '2.5rem', // 40px
+  12: '3rem', // 48px
+  16: '4rem', // 64px
+  20: '5rem', // 80px
+  24: '6rem', // 96px
+  32: '8rem', // 128px
 } as const;
 
 // Border Radius Scale
 export const borderRadius = {
   none: '0',
-  sm: '0.125rem',   // 2px
+  sm: '0.125rem', // 2px
   default: '0.25rem', // 4px
-  md: '0.375rem',   // 6px
-  lg: '0.5rem',     // 8px
-  xl: '0.75rem',    // 12px
-  '2xl': '1rem',    // 16px
-  '3xl': '1.5rem',  // 24px
+  md: '0.375rem', // 6px
+  lg: '0.5rem', // 8px
+  xl: '0.75rem', // 12px
+  '2xl': '1rem', // 16px
+  '3xl': '1.5rem', // 24px
   full: '9999px',
 } as const;
 
@@ -134,9 +134,11 @@ export const shadows = {
   md: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
   lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
   xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-  calendar: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+  calendar:
+    '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
   event: '0 2px 4px -1px rgba(0, 0, 0, 0.1)',
-  modal: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+  modal:
+    '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
 } as const;
 
 // Animation Durations
@@ -187,7 +189,7 @@ export const components = {
     eventSpacing: '2px',
     headerHeight: '64px',
   },
-  
+
   event: {
     colors: {
       work: colors.eventCategories.work,
@@ -205,14 +207,14 @@ export const components = {
       disabled: '0.5',
     },
   },
-  
+
   modal: {
     backdropColor: 'rgba(0, 0, 0, 0.5)',
     maxWidth: '640px',
     borderRadius: borderRadius.lg,
     shadow: shadows.modal,
   },
-  
+
   button: {
     height: {
       sm: '32px',

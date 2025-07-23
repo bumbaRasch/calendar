@@ -1,11 +1,11 @@
-import { createFileRoute } from '@tanstack/react-router'
-import Calendar from '../components/Calendar'
-import type { CalendarEvent } from '../types/event'
-import { EventCategory, EventPriority, EventStatus } from '../types/event'
+import { createFileRoute } from '@tanstack/react-router';
+import Calendar from '../components/Calendar';
+import type { CalendarEvent } from '../types/event';
+import { EventCategory, EventPriority, EventStatus } from '../types/event';
 
 export const Route = createFileRoute('/')({
   component: App,
-})
+});
 
 function App() {
   // Enhanced sample events with categories and details
@@ -29,7 +29,9 @@ function App() {
     {
       id: '2',
       title: 'Product Launch Deadline',
-      start: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      start: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split('T')[0],
       allDay: true,
       category: EventCategory.WORK,
       priority: EventPriority.URGENT,
@@ -43,8 +45,14 @@ function App() {
     {
       id: '3',
       title: 'Client Presentation',
-      start: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] + 'T14:00:00',
-      end: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] + 'T15:30:00',
+      start:
+        new Date(Date.now() + 2 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split('T')[0] + 'T14:00:00',
+      end:
+        new Date(Date.now() + 2 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split('T')[0] + 'T15:30:00',
       allDay: false,
       category: EventCategory.MEETING,
       priority: EventPriority.HIGH,
@@ -60,8 +68,14 @@ function App() {
     {
       id: '4',
       title: 'Doctor Appointment',
-      start: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] + 'T09:00:00',
-      end: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] + 'T10:00:00',
+      start:
+        new Date(Date.now() + 1 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split('T')[0] + 'T09:00:00',
+      end:
+        new Date(Date.now() + 1 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split('T')[0] + 'T10:00:00',
       allDay: false,
       category: EventCategory.HEALTH,
       priority: EventPriority.MEDIUM,
@@ -74,8 +88,12 @@ function App() {
     {
       id: '5',
       title: 'Weekend Trip to Mountains',
-      start: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      end: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      start: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split('T')[0],
+      end: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split('T')[0],
       allDay: true,
       category: EventCategory.TRAVEL,
       priority: EventPriority.LOW,
@@ -89,8 +107,14 @@ function App() {
     {
       id: '6',
       title: 'JavaScript Workshop',
-      start: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] + 'T13:00:00',
-      end: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] + 'T17:00:00',
+      start:
+        new Date(Date.now() + 4 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split('T')[0] + 'T13:00:00',
+      end:
+        new Date(Date.now() + 4 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split('T')[0] + 'T17:00:00',
       allDay: false,
       category: EventCategory.EDUCATION,
       priority: EventPriority.MEDIUM,
@@ -105,8 +129,14 @@ function App() {
     {
       id: '7',
       title: 'Birthday Party',
-      start: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] + 'T18:00:00',
-      end: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] + 'T22:00:00',
+      start:
+        new Date(Date.now() + 6 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split('T')[0] + 'T18:00:00',
+      end:
+        new Date(Date.now() + 6 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split('T')[0] + 'T22:00:00',
       allDay: false,
       category: EventCategory.SOCIAL,
       priority: EventPriority.MEDIUM,
@@ -120,8 +150,14 @@ function App() {
     {
       id: '8',
       title: 'Grocery Shopping',
-      start: new Date(Date.now() + 8 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] + 'T11:00:00',
-      end: new Date(Date.now() + 8 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] + 'T12:00:00',
+      start:
+        new Date(Date.now() + 8 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split('T')[0] + 'T11:00:00',
+      end:
+        new Date(Date.now() + 8 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split('T')[0] + 'T12:00:00',
       allDay: false,
       category: EventCategory.PERSONAL,
       priority: EventPriority.LOW,
@@ -139,10 +175,10 @@ function App() {
         <h1 className="text-3xl font-bold text-gray-900">Calendar</h1>
         <p className="text-gray-600 mt-2">Manage your events and schedule</p>
       </div>
-      
+
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <Calendar events={sampleEvents} />
       </div>
     </div>
-  )
+  );
 }

@@ -1,9 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
       // Design System Colors (2025)
@@ -22,7 +19,7 @@ export default {
           900: '#1e3a8a',
           950: '#172554',
         },
-        
+
         // Secondary Colors
         secondary: {
           50: '#f8fafc',
@@ -36,7 +33,7 @@ export default {
           800: '#1e293b',
           900: '#0f172a',
         },
-        
+
         // Calendar-specific colors
         calendar: {
           today: '#fef3c7',
@@ -48,7 +45,7 @@ export default {
           selected: '#ddd6fe',
           selectedText: '#5b21b6',
         },
-        
+
         // Event Category Colors
         event: {
           work: '#3b82f6',
@@ -60,7 +57,7 @@ export default {
           health: '#84cc16',
           social: '#ec4899',
         },
-        
+
         // Status Colors
         success: {
           50: '#f0fdf4',
@@ -83,7 +80,7 @@ export default {
           600: '#2563eb',
         },
       },
-      
+
       // Typography Scale
       fontFamily: {
         sans: [
@@ -108,38 +105,41 @@ export default {
           'monospace',
         ],
       },
-      
+
       fontSize: {
-        'xs': ['0.75rem', { lineHeight: '1rem' }],
-        'sm': ['0.875rem', { lineHeight: '1.25rem' }],
-        'base': ['1rem', { lineHeight: '1.5rem' }],
-        'lg': ['1.125rem', { lineHeight: '1.75rem' }],
-        'xl': ['1.25rem', { lineHeight: '1.75rem' }],
+        xs: ['0.75rem', { lineHeight: '1rem' }],
+        sm: ['0.875rem', { lineHeight: '1.25rem' }],
+        base: ['1rem', { lineHeight: '1.5rem' }],
+        lg: ['1.125rem', { lineHeight: '1.75rem' }],
+        xl: ['1.25rem', { lineHeight: '1.75rem' }],
         '2xl': ['1.5rem', { lineHeight: '2rem' }],
         '3xl': ['1.875rem', { lineHeight: '2.25rem' }],
         '4xl': ['2.25rem', { lineHeight: '2.5rem' }],
       },
-      
+
       // Spacing Scale
       spacing: {
-        '18': '4.5rem',
-        '88': '22rem',
-        '128': '32rem',
+        18: '4.5rem',
+        88: '22rem',
+        128: '32rem',
       },
-      
+
       // Border Radius
       borderRadius: {
         '4xl': '2rem',
       },
-      
+
       // Box Shadow
       boxShadow: {
-        'calendar': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-        'event': '0 2px 4px -1px rgba(0, 0, 0, 0.1)',
-        'modal': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-        'floating': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+        calendar:
+          '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        event: '0 2px 4px -1px rgba(0, 0, 0, 0.1)',
+        modal:
+          '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+        floating:
+          '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
       },
-      
+
       // Animation & Transitions
       animation: {
         'fade-in': 'fadeIn 0.2s ease-in-out',
@@ -147,40 +147,40 @@ export default {
         'slide-down': 'slideDown 0.3s ease-out',
         'scale-in': 'scaleIn 0.2s ease-out',
         'bounce-subtle': 'bounceSubtle 0.4s ease-out',
-        'shimmer': 'shimmer 2s infinite',
+        shimmer: 'shimmer 2s infinite',
       },
-      
+
       keyframes: {
         fadeIn: {
           '0%': { opacity: '0' },
           '100%': { opacity: '1' },
         },
         slideUp: {
-          '0%': { 
+          '0%': {
             opacity: '0',
             transform: 'translateY(10px)',
           },
-          '100%': { 
+          '100%': {
             opacity: '1',
             transform: 'translateY(0)',
           },
         },
         slideDown: {
-          '0%': { 
+          '0%': {
             opacity: '0',
             transform: 'translateY(-10px)',
           },
-          '100%': { 
+          '100%': {
             opacity: '1',
             transform: 'translateY(0)',
           },
         },
         scaleIn: {
-          '0%': { 
+          '0%': {
             opacity: '0',
             transform: 'scale(0.95)',
           },
-          '100%': { 
+          '100%': {
             opacity: '1',
             transform: 'scale(1)',
           },
@@ -205,47 +205,47 @@ export default {
           },
         },
       },
-      
+
       // Transition Duration
       transitionDuration: {
-        '400': '400ms',
-        '600': '600ms',
+        400: '400ms',
+        600: '600ms',
       },
-      
+
       // Z-Index Scale
       zIndex: {
-        'dropdown': '1000',
-        'modal': '1050',
-        'tooltip': '1070',
-        'notification': '1080',
+        dropdown: '1000',
+        modal: '1050',
+        tooltip: '1070',
+        notification: '1080',
       },
-      
+
       // Container Queries (Modern CSS)
       screens: {
-        'xs': '475px',
+        xs: '475px',
         'container-sm': '640px',
         'container-md': '768px',
         'container-lg': '1024px',
         'container-xl': '1280px',
       },
-      
+
       // Grid Templates
       gridTemplateColumns: {
-        'calendar': 'repeat(7, minmax(0, 1fr))',
-        'sidebar': '280px 1fr',
-        'dashboard': 'repeat(auto-fit, minmax(300px, 1fr))',
+        calendar: 'repeat(7, minmax(0, 1fr))',
+        sidebar: '280px 1fr',
+        dashboard: 'repeat(auto-fit, minmax(300px, 1fr))',
       },
-      
+
       // Aspect Ratios
       aspectRatio: {
-        'calendar': '7 / 5',
+        calendar: '7 / 5',
         'event-card': '16 / 9',
       },
     },
   },
   plugins: [
     // Custom plugin for calendar-specific utilities
-    function({ addUtilities, theme }) {
+    function ({ addUtilities, theme }) {
       const calendarUtilities = {
         '.calendar-grid': {
           display: 'grid',
@@ -280,19 +280,19 @@ export default {
           animation: 'shimmer 2s infinite',
         },
       };
-      
+
       addUtilities(calendarUtilities);
     },
   ],
-  
+
   // Dark mode support
   darkMode: 'class',
-  
+
   // Modern CSS features
   future: {
     hoverOnlyWhenSupported: true,
   },
-  
+
   // Performance optimizations
   experimental: {
     optimizeUniversalDefaults: true,

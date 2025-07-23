@@ -6,7 +6,12 @@ import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
 import type { DateSelectArg, EventClickArg } from '@fullcalendar/core';
 import type { CalendarEvent } from '../types/event';
-import { EventCategory, EventPriority, EventStatus, eventUtils } from '../types/event';
+import {
+  EventCategory,
+  EventPriority,
+  EventStatus,
+  eventUtils,
+} from '../types/event';
 
 interface CalendarProps {
   events?: CalendarEvent[];
@@ -14,19 +19,28 @@ interface CalendarProps {
   onEventClick?: (clickInfo: EventClickArg) => void;
 }
 
-type CalendarView = 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek';
+type CalendarView =
+  | 'dayGridMonth'
+  | 'timeGridWeek'
+  | 'timeGridDay'
+  | 'listWeek';
 
-const Calendar: React.FC<CalendarProps> = ({ 
-  events = [], 
+const Calendar: React.FC<CalendarProps> = ({
+  events = [],
   onDateSelect,
-  onEventClick 
+  onEventClick,
 }) => {
   const [currentView, setCurrentView] = useState<CalendarView>('dayGridMonth');
 
   // Load view preference from localStorage on mount
   useEffect(() => {
     const savedView = localStorage.getItem('calendar-view') as CalendarView;
-    if (savedView && ['dayGridMonth', 'timeGridWeek', 'timeGridDay', 'listWeek'].includes(savedView)) {
+    if (
+      savedView &&
+      ['dayGridMonth', 'timeGridWeek', 'timeGridDay', 'listWeek'].includes(
+        savedView,
+      )
+    ) {
       setCurrentView(savedView);
     }
   }, []);
@@ -72,7 +86,11 @@ const Calendar: React.FC<CalendarProps> = ({
       onEventClick(clickInfo);
     } else {
       // Default behavior: show event details and allow deletion
-      if (confirm(`Are you sure you want to delete the event '${clickInfo.event.title}'`)) {
+      if (
+        confirm(
+          `Are you sure you want to delete the event '${clickInfo.event.title}'`,
+        )
+      ) {
         clickInfo.event.remove();
       }
     }
@@ -96,9 +114,10 @@ const Calendar: React.FC<CalendarProps> = ({
               onClick={() => handleViewChange(button.key)}
               className={`
                 inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200
-                ${currentView === button.key
-                  ? 'bg-blue-600 text-white shadow-md transform scale-105'
-                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-gray-400 hover:shadow-sm'
+                ${
+                  currentView === button.key
+                    ? 'bg-blue-600 text-white shadow-md transform scale-105'
+                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-gray-400 hover:shadow-sm'
                 }
               `}
             >
@@ -117,7 +136,7 @@ const Calendar: React.FC<CalendarProps> = ({
         headerToolbar={{
           left: 'prev,next today',
           center: 'title',
-          right: '' // We're using our custom view switcher
+          right: '', // We're using our custom view switcher
         }}
         initialView={currentView}
         editable={true}

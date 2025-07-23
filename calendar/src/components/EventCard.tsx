@@ -1,6 +1,11 @@
 import React from 'react';
 import type { CalendarEvent } from '../types/event';
-import { CATEGORY_CONFIG, PRIORITY_CONFIG, STATUS_CONFIG, eventUtils } from '../types/event';
+import {
+  CATEGORY_CONFIG,
+  PRIORITY_CONFIG,
+  STATUS_CONFIG,
+  eventUtils,
+} from '../types/event';
 
 interface EventCardProps {
   event: CalendarEvent;
@@ -92,7 +97,9 @@ const EventCard: React.FC<EventCardProps> = ({
         {/* Event details */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <h3 className="font-semibold text-gray-900 truncate">{event.title}</h3>
+            <h3 className="font-semibold text-gray-900 truncate">
+              {event.title}
+            </h3>
             <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
               {categoryConfig.label}
             </span>
@@ -102,7 +109,8 @@ const EventCard: React.FC<EventCardProps> = ({
           </div>
           <div className="flex items-center gap-4 text-sm text-gray-600">
             <span className="flex items-center gap-1">
-              🕒 {eventUtils.formatEventTime(event.start, event.end, event.allDay)}
+              🕒{' '}
+              {eventUtils.formatEventTime(event.start, event.end, event.allDay)}
             </span>
             {event.location && (
               <span className="flex items-center gap-1 truncate">
@@ -219,7 +227,9 @@ const EventCard: React.FC<EventCardProps> = ({
             {eventUtils.formatEventDate(event.start)}
           </span>
           <span className="text-gray-500">•</span>
-          <span>{eventUtils.formatEventTime(event.start, event.end, event.allDay)}</span>
+          <span>
+            {eventUtils.formatEventTime(event.start, event.end, event.allDay)}
+          </span>
         </div>
 
         {/* Location */}
@@ -281,7 +291,9 @@ const EventCard: React.FC<EventCardProps> = ({
             {event.createdBy && ` by ${event.createdBy}`}
           </span>
           {event.updatedAt !== event.createdAt && (
-            <span>Updated {new Date(event.updatedAt).toLocaleDateString()}</span>
+            <span>
+              Updated {new Date(event.updatedAt).toLocaleDateString()}
+            </span>
           )}
         </div>
       </div>
