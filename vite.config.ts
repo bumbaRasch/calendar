@@ -5,8 +5,9 @@ import { tanstackRouter } from '@tanstack/router-plugin/vite';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command, mode }) => ({
+  base: process.env.NODE_ENV === 'production' ? '/calendar/' : '/',
   plugins: [
-    tanstackRouter({ 
+    tanstackRouter({
       autoCodeSplitting: true,
       generatedRouteTree: './src/routeTree.gen.ts',
     }),
@@ -34,33 +35,29 @@ export default defineConfig(({ command, mode }) => ({
           // React and core libraries
           'react-vendor': ['react', 'react-dom'],
           // Router and navigation
-          'router': ['@tanstack/react-router'],
+          router: ['@tanstack/react-router'],
           // UI components and styling
           'ui-vendor': [
             '@radix-ui/react-dialog',
-            '@radix-ui/react-label', 
+            '@radix-ui/react-label',
             '@radix-ui/react-slot',
             '@radix-ui/react-tooltip',
             'lucide-react',
             'class-variance-authority',
             'clsx',
-            'tailwind-merge'
+            'tailwind-merge',
           ],
           // Calendar libraries
-          'calendar': [
+          calendar: [
             '@fullcalendar/core',
             '@fullcalendar/daygrid',
             '@fullcalendar/react',
             '@fullcalendar/interaction',
             '@fullcalendar/timegrid',
-            '@fullcalendar/list'
+            '@fullcalendar/list',
           ],
           // Form handling
-          'forms': [
-            'react-hook-form',
-            '@hookform/resolvers',
-            'zod'
-          ],
+          forms: ['react-hook-form', '@hookform/resolvers', 'zod'],
         },
         // Consistent chunk naming
         chunkFileNames: 'assets/[name]-[hash].js',
