@@ -28,9 +28,16 @@ const EventCard: React.FC<EventCardProps> = ({
   const priorityConfig = PRIORITY_CONFIG[event.priority];
   const statusConfig = STATUS_CONFIG[event.status];
 
-  const handleClick = (e: React.MouseEvent) => {
+  const handleClick = (e: React.MouseEvent | React.KeyboardEvent) => {
     e.stopPropagation();
     onClick?.(event);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleClick(e);
+    }
   };
 
   const handleEdit = (e: React.MouseEvent) => {
@@ -48,9 +55,12 @@ const EventCard: React.FC<EventCardProps> = ({
     return (
       <div
         onClick={handleClick}
+        onKeyDown={handleKeyDown}
+        role="button"
+        tabIndex={0}
         className={`
           event-card-calendar relative group cursor-pointer rounded-sm px-1 py-0.5 text-xs
-          transition-all duration-200 hover:shadow-sm hover:scale-105
+          transition-all duration-200 hover:shadow-sm hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1
           ${className}
         `}
         style={{
@@ -59,6 +69,7 @@ const EventCard: React.FC<EventCardProps> = ({
           color: categoryConfig.textColor,
         }}
         title={`${event.title}${event.location ? ` @ ${event.location}` : ''}`}
+        aria-label={`Event: ${event.title}${event.location ? ` at ${event.location}` : ''}`}
       >
         <div className="flex items-center gap-1">
           <span className="text-xs opacity-75">{categoryConfig.icon}</span>
@@ -76,15 +87,20 @@ const EventCard: React.FC<EventCardProps> = ({
     return (
       <div
         onClick={handleClick}
+        onKeyDown={handleKeyDown}
+        role="button"
+        tabIndex={0}
         className={`
           event-card-list group flex items-center gap-3 p-3 rounded-lg border
           cursor-pointer transition-all duration-200 hover:shadow-md hover:border-gray-300
+          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
           ${className}
         `}
         style={{
           borderColor: categoryConfig.borderColor,
           backgroundColor: 'white',
         }}
+        aria-label={`Event: ${event.title}${event.location ? ` at ${event.location}` : ''}`}
       >
         {/* Category indicator */}
         <div

@@ -11,15 +11,33 @@ export default function Footer() {
           </div>
 
           <div className="flex space-x-6 text-sm text-gray-600">
-            <a href="#" className="hover:text-gray-900 transition-colors">
+            <button
+              type="button"
+              className="hover:text-gray-900 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
+              onClick={() => {
+                /* About functionality will be implemented later */
+              }}
+            >
               About
-            </a>
-            <a href="#" className="hover:text-gray-900 transition-colors">
+            </button>
+            <button
+              type="button"
+              className="hover:text-gray-900 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
+              onClick={() => {
+                /* Privacy functionality will be implemented later */
+              }}
+            >
               Privacy
-            </a>
-            <a href="#" className="hover:text-gray-900 transition-colors">
+            </button>
+            <button
+              type="button"
+              className="hover:text-gray-900 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
+              onClick={() => {
+                /* Support functionality will be implemented later */
+              }}
+            >
               Support
-            </a>
+            </button>
           </div>
         </div>
       </div>
