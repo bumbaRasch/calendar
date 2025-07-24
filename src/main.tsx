@@ -16,7 +16,7 @@ const router = createRouter({
   scrollRestoration: true,
   defaultStructuralSharing: true,
   defaultPreloadStaleTime: 0,
-  basepath: import.meta.env.BASE_URL.slice(0, -1), // Remove trailing slash
+  basepath: '/calendar',
 });
 
 // Register the router instance for type safety

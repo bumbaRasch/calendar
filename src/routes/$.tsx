@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/$')({
   component: () => (
@@ -14,12 +14,12 @@ export const Route = createFileRoute('/$')({
           Current path: {window.location.pathname}
         </p>
         <div className="mt-6">
-          <a
-            href="/calendar/"
+          <Link
+            to="/"
             className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
           >
             Go to Calendar
-          </a>
+          </Link>
         </div>
       </div>
     </div>
