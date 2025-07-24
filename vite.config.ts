@@ -5,7 +5,7 @@ import { tanstackRouter } from '@tanstack/router-plugin/vite';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command, mode }) => ({
-  base: process.env.NODE_ENV === 'production' ? '/calendar/' : '/',
+  base: command === 'serve' ? '/' : '/calendar/',
   plugins: [
     tanstackRouter({
       autoCodeSplitting: true,
