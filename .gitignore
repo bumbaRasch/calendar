@@ -1,0 +1,72 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Build outputs
+dist/
+dist-ssr/
+build/
+out/
+.next/
+.nuxt/
+.output/
+
+# Runtime & caches
+.vite/
+.cache/
+.temp/
+.tmp/
+*.tsbuildinfo
+.eslintcache
+
+# Environment & config
+.env*
+!.env.example
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.local
+
+# Framework specific
+.nitro/
+.tanstack/
+.turbo/
+.vercel/
+.netlify/
+
+# OS & Editor
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*~
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.swp
+*.swo
+
+# Logs
+logs/
+*.log
+
+# Testing
+coverage/
+.nyc_output/
+junit.xml
+
+# Custom project files
+count.txt
+
+# Documentation (if not needed in repo)
+docs/
