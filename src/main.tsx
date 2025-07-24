@@ -10,6 +10,26 @@ import { queryClient } from './lib/queryClient';
 import './styles.css';
 import reportWebVitals from './reportWebVitals.ts';
 
+// Initialize theme
+const initializeTheme = () => {
+  const isDarkMode =
+    localStorage.getItem('isDarkMode') === 'true' ||
+    (!localStorage.getItem('isDarkMode') &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+  if (isDarkMode) {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
+
+  // Store the preference
+  localStorage.setItem('isDarkMode', isDarkMode.toString());
+};
+
+// Initialize theme before rendering
+initializeTheme();
+
 // Create a new router instance
 const router = createRouter({
   routeTree,
