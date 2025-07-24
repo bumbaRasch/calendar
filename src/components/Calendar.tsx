@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -6,12 +6,9 @@ import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
 import type { DateSelectArg, EventClickArg } from '@fullcalendar/core';
 import type { CalendarEvent } from '../types/event';
-import {
-  EventCategory,
-  EventPriority,
-  EventStatus,
-  eventUtils,
-} from '../types/event';
+import { eventUtils } from '../types/event';
+import { useUIStore } from '../stores/useUIStore';
+import { useEventStore } from '../stores/useEventStore';
 
 interface CalendarProps {
   events?: CalendarEvent[];
@@ -26,28 +23,25 @@ type CalendarView =
   | 'listWeek';
 
 const Calendar: React.FC<CalendarProps> = ({
-  events = [],
+  events: propEvents,
   onDateSelect,
   onEventClick,
 }) => {
-  const [currentView, setCurrentView] = useState<CalendarView>('dayGridMonth');
+  // Zustand stores
+  const {
+    calendarView,
+    setCalendarView,
+    setEventDialogOpen,
+    setSelectedEventId,
+  } = useUIStore();
+  const { events: storeEvents, addEvent } = useEventStore();
 
-  // Load view preference from localStorage on mount
-  useEffect(() => {
-    const savedView = localStorage.getItem('calendar-view') as CalendarView;
-    if (
-      savedView &&
-      ['dayGridMonth', 'timeGridWeek', 'timeGridDay', 'listWeek'].includes(
-        savedView,
-      )
-    ) {
-      setCurrentView(savedView);
-    }
-  }, []);
+  // Use store events if no props events provided
+  const events = propEvents || storeEvents;
 
   // Save view preference to localStorage when changed
   const handleViewChange = (view: CalendarView) => {
-    setCurrentView(view);
+    setCalendarView(view);
     localStorage.setItem('calendar-view', view);
   };
 
@@ -55,28 +49,27 @@ const Calendar: React.FC<CalendarProps> = ({
     if (onDateSelect) {
       onDateSelect(selectInfo);
     } else {
-      // Default behavior: create a simple event with category
+      // Default behavior: open event dialog with pre-filled data
+      setSelectedEventId(null); // Clear any selected event for new event
+      setEventDialogOpen(true);
+
+      // Store the selection info for the dialog to use
+      // For now, create a simple event as fallback
       const title = prompt('Please enter a new title for your event');
       const calendarApi = selectInfo.view.calendar;
 
       calendarApi.unselect(); // clear date selection
 
       if (title) {
-        const newEvent: CalendarEvent = {
-          id: eventUtils.generateId(),
+        const newEventData = {
           title,
           start: selectInfo.startStr,
           end: selectInfo.endStr,
           allDay: selectInfo.allDay,
-          category: EventCategory.OTHER,
-          priority: EventPriority.MEDIUM,
-          status: EventStatus.CONFIRMED,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
         };
 
-        // Convert to FullCalendar format and add
-        calendarApi.addEvent(eventUtils.toFullCalendarEvent(newEvent));
+        // Add to store instead of directly to calendar
+        addEvent(newEventData);
       }
     }
   };
@@ -85,13 +78,11 @@ const Calendar: React.FC<CalendarProps> = ({
     if (onEventClick) {
       onEventClick(clickInfo);
     } else {
-      // Default behavior: show event details and allow deletion
-      if (
-        confirm(
-          `Are you sure you want to delete the event '${clickInfo.event.title}'`,
-        )
-      ) {
-        clickInfo.event.remove();
+      // Default behavior: open event dialog for editing
+      const eventId = clickInfo.event.id;
+      if (eventId) {
+        setSelectedEventId(eventId);
+        setEventDialogOpen(true);
       }
     }
   };
@@ -115,7 +106,7 @@ const Calendar: React.FC<CalendarProps> = ({
               className={`
                 inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200
                 ${
-                  currentView === button.key
+                  calendarView === button.key
                     ? 'bg-blue-600 text-white shadow-md transform scale-105'
                     : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-gray-400 hover:shadow-sm'
                 }
@@ -131,14 +122,14 @@ const Calendar: React.FC<CalendarProps> = ({
 
       {/* FullCalendar Component */}
       <FullCalendar
-        key={currentView} // Force re-render when view changes
+        key={calendarView} // Force re-render when view changes
         plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
         headerToolbar={{
           left: 'prev,next today',
           center: 'title',
           right: '', // We're using our custom view switcher
         }}
-        initialView={currentView}
+        initialView={calendarView}
         editable={true}
         selectable={true}
         selectMirror={true}
@@ -148,12 +139,12 @@ const Calendar: React.FC<CalendarProps> = ({
         select={handleDateSelect}
         eventClick={handleEventClick}
         height="auto"
-        aspectRatio={currentView === 'listWeek' ? 2.5 : 1.35}
+        aspectRatio={calendarView === 'listWeek' ? 2.5 : 1.35}
         // List view specific options
         listDayFormat={{ weekday: 'long', month: 'long', day: 'numeric' }}
         listDaySideFormat={{ weekday: 'short' }}
         // Custom event display for different views
-        eventDisplay={currentView === 'listWeek' ? 'list-item' : 'auto'}
+        eventDisplay={calendarView === 'listWeek' ? 'list-item' : 'auto'}
         // View-specific configurations
         views={{
           dayGridMonth: {
