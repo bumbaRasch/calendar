@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import type { DateSelectArg } from '@fullcalendar/core';
 
 interface UIState {
   // Dialog/Modal states
@@ -9,6 +10,10 @@ interface UIState {
   // Selected event for editing
   selectedEventId: string | null;
   setSelectedEventId: (id: string | null) => void;
+
+  // Selected date info for new event creation
+  selectedDateInfo: DateSelectArg | null;
+  setSelectedDateInfo: (dateInfo: DateSelectArg | null) => void;
 
   // Calendar view state
   calendarView: 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek';
@@ -40,6 +45,10 @@ export const useUIStore = create<UIState>()(
       // Selected event
       selectedEventId: null,
       setSelectedEventId: (id) => set({ selectedEventId: id }),
+
+      // Selected date info
+      selectedDateInfo: null,
+      setSelectedDateInfo: (dateInfo) => set({ selectedDateInfo: dateInfo }),
 
       // Calendar view
       calendarView:

@@ -576,3 +576,33 @@ code {
     animation: none !important;
   }
 }
+
+/* Dialog and Modal Fixes */
+[data-slot='dialog-overlay'] {
+  background-color: rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(4px) !important;
+  z-index: 9998 !important;
+}
+
+[data-slot='dialog-content'] {
+  background-color: white !important;
+  opacity: 1 !important;
+  z-index: 9999 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+}
+
+.dark [data-slot='dialog-content'] {
+  background-color: #111827 !important;
+  border-color: #374151 !important;
+  color: #f9fafb !important;
+}
+
+/* Ensure dialog content is always visible */
+[data-slot='dialog-content'] * {
+  color: inherit;
+}
+
+.dark [data-slot='dialog-content'] * {
+  color: inherit;
+}

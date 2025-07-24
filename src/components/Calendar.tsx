@@ -12,13 +12,14 @@ import type {
   EventApi,
 } from '@fullcalendar/core';
 
-import type { CalendarEvent } from '../types/event';
-import { eventUtils, EventCategory, EventPriority } from '../types/event';
+import type { CalendarEvent, EventFormData } from '../types/event';
+import { eventUtils } from '../types/event';
 import { useUIStore } from '../stores/useUIStore';
 import { useEventStore } from '../stores/useEventStore';
 import { CalendarToolbar } from './Calendar/CalendarToolbar';
 import { CustomEventContent } from './Calendar/CustomEventContent';
 import { EventTooltip } from './Calendar/EventTooltip';
+import { EventDialog } from './Calendar/EventDialog';
 import { useCalendarTheme } from './Calendar/hooks/useCalendarTheme';
 import { useEventTooltip } from './Calendar/hooks/useEventTooltip';
 import { useKeyboardShortcuts } from './Calendar/hooks/useKeyboardShortcuts';
@@ -54,11 +55,20 @@ const Calendar: React.FC<CalendarProps> = ({
   const {
     calendarView,
     setCalendarView,
+    isEventDialogOpen,
     setEventDialogOpen,
+    selectedEventId,
     setSelectedEventId,
+    selectedDateInfo,
+    setSelectedDateInfo,
     isDarkMode,
   } = useUIStore();
-  const { events: storeEvents, addEvent } = useEventStore();
+  const {
+    events: storeEvents,
+    addEvent,
+    updateEvent,
+    getEventById,
+  } = useEventStore();
 
   // Custom hooks
   const { theme, themeClasses } = useCalendarTheme(isDarkMode);
@@ -103,27 +113,13 @@ const Calendar: React.FC<CalendarProps> = ({
         return;
       }
 
-      // Default behavior: create new event
+      // Default behavior: open modern event dialog
       setSelectedEventId(null);
+      setSelectedDateInfo(selectInfo);
       setEventDialogOpen(true);
-
-      const title = prompt('Please enter a new title for your event');
       selectInfo.view.calendar.unselect();
-
-      if (title) {
-        const newEventData = {
-          title,
-          start: selectInfo.startStr,
-          end: selectInfo.endStr,
-          allDay: selectInfo.allDay,
-          category: EventCategory.PERSONAL,
-          priority: EventPriority.MEDIUM,
-        };
-
-        addEvent(newEventData);
-      }
     },
-    [onDateSelect, setSelectedEventId, setEventDialogOpen, addEvent],
+    [onDateSelect, setSelectedEventId, setSelectedDateInfo, setEventDialogOpen],
   );
 
   const handleEventClick = useCallback(
@@ -337,7 +333,7 @@ const Calendar: React.FC<CalendarProps> = ({
         </div>
 
         {/* Event Tooltip */}
-        {tooltipState.event && (
+        {tooltipState.event && !isEventDialogOpen && (
           <EventTooltip
             event={tooltipState.event}
             position={tooltipState.position}
@@ -345,6 +341,72 @@ const Calendar: React.FC<CalendarProps> = ({
             onClose={hideTooltip}
           />
         )}
+
+        {/* Event Dialog */}
+        <EventDialog
+          isOpen={isEventDialogOpen}
+          onClose={() => {
+            setEventDialogOpen(false);
+            setSelectedDateInfo(null);
+            setSelectedEventId(null);
+          }}
+          onSave={(eventData: EventFormData) => {
+            if (selectedEventId) {
+              // Update existing event
+              const existingEvent = getEventById(selectedEventId);
+              if (existingEvent) {
+                const updatedEvent: CalendarEvent = {
+                  ...existingEvent,
+                  ...eventData,
+                  id: selectedEventId,
+                  createdAt: existingEvent.createdAt,
+                  updatedAt: new Date().toISOString(),
+                };
+                updateEvent(selectedEventId, updatedEvent);
+              }
+            } else {
+              // Create new event
+              const newEvent = {
+                ...eventData,
+                id: eventUtils.generateId(),
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+              };
+              addEvent(newEvent);
+            }
+          }}
+          initialData={
+            selectedEventId
+              ? (() => {
+                  const event = getEventById(selectedEventId);
+                  if (event) {
+                    return {
+                      title: event.title,
+                      start:
+                        typeof event.start === 'string'
+                          ? event.start
+                          : event.start.toISOString().slice(0, 16),
+                      end: event.end
+                        ? typeof event.end === 'string'
+                          ? event.end
+                          : event.end.toISOString().slice(0, 16)
+                        : undefined,
+                      allDay: event.allDay,
+                      category: event.category,
+                      priority: event.priority,
+                      status: event.status,
+                      description: event.description,
+                      location: event.location,
+                      attendees: event.attendees,
+                      url: event.url,
+                    };
+                  }
+                  return undefined;
+                })()
+              : undefined
+          }
+          selectedDateInfo={selectedDateInfo}
+        />
       </div>
     </TooltipProvider>
   );
