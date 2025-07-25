@@ -223,7 +223,7 @@ export const EventDialog: React.FC<EventDialogProps> = ({
   };
 
   // Real-time validation for specific fields
-  const validateField = (field: keyof EventFormData, value: any) => {
+  const validateField = (field: keyof EventFormData, value: unknown) => {
     const newErrors = { ...errors };
 
     switch (field) {

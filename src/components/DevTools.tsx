@@ -6,12 +6,7 @@ import { RefreshCw, Trash2, Plus } from 'lucide-react';
 const DevTools: React.FC = () => {
   const { events, clearEvents, initializeSeedEvents } = useEventStore();
 
-  // Always show for debugging (remove NODE_ENV check temporarily)
-  console.log('DevTools: Current events count:', events.length);
-  console.log('DevTools: NODE_ENV:', process.env.NODE_ENV);
-
-  // Always show DevTools for troubleshooting
-  console.log('DevTools: Rendering DevTools component');
+  // Development tools component
 
   return (
     <div className="fixed bottom-4 right-4 z-[9999] bg-yellow-200 border-4 border-yellow-600 rounded-lg shadow-2xl p-4 min-w-[280px]">
@@ -23,7 +18,7 @@ const DevTools: React.FC = () => {
         <span className="font-bold text-blue-600">{events.length}</span>
         <br />
         <span className="text-gray-500">
-          Click "Add Seeds" to add test events
+          Click &quot;Add Seeds&quot; to add test events
         </span>
       </div>
       <div className="flex gap-2">
@@ -31,23 +26,13 @@ const DevTools: React.FC = () => {
           size="sm"
           variant="outline"
           onClick={() => {
-            console.log('DevTools: Add Seeds clicked');
-            console.log('DevTools: Events before:', events.length);
             initializeSeedEvents();
             // Check events after a small delay
             setTimeout(() => {
               const newEvents = useEventStore.getState().events;
-              console.log('DevTools: Events after:', newEvents.length);
-              console.log(
-                'DevTools: Event dates:',
-                newEvents.map((e) => ({ title: e.title, start: e.start })),
-              );
-
               // Navigate calendar to today to show the seed events
               if (newEvents.length > 0) {
-                console.log(
-                  'DevTools: Calendar should automatically show events with array-based approach',
-                );
+                // Calendar should automatically show events with array-based approach
               }
             }, 100);
           }}
@@ -60,7 +45,6 @@ const DevTools: React.FC = () => {
           size="sm"
           variant="outline"
           onClick={() => {
-            console.log('DevTools: Clear All clicked');
             clearEvents();
           }}
           className="flex items-center gap-1 text-xs"

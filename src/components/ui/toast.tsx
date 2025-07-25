@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle, XCircle, Info, AlertTriangle } from 'lucide-react';
+import { CheckCircle, XCircle, Info, AlertTriangle, X } from 'lucide-react';
+import { cn } from '../../lib/utils';
+import { FadeIn, ScaleIn } from './animated';
+import { useThemeContext } from '../ThemeProvider';
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
@@ -18,6 +21,7 @@ interface ToastProps {
 
 const ToastComponent: React.FC<ToastProps> = ({ toast, onRemove }) => {
   const [isVisible, setIsVisible] = useState(false);
+  const { theme } = useThemeContext();
 
   useEffect(() => {
     // Animate in
@@ -33,61 +37,108 @@ const ToastComponent: React.FC<ToastProps> = ({ toast, onRemove }) => {
   }, [toast.id, toast.duration, onRemove]);
 
   const getIcon = () => {
+    const iconClass = 'h-5 w-5 transition-transform duration-200';
     switch (toast.type) {
       case 'success':
-        return <CheckCircle className="h-5 w-5 text-green-600" />;
+        return (
+          <CheckCircle
+            className={cn(iconClass)}
+            style={{ color: theme.colors.success.main }}
+          />
+        );
       case 'error':
-        return <XCircle className="h-5 w-5 text-red-600" />;
+        return (
+          <XCircle
+            className={cn(iconClass)}
+            style={{ color: theme.colors.error.main }}
+          />
+        );
       case 'warning':
-        return <AlertTriangle className="h-5 w-5 text-yellow-600" />;
+        return (
+          <AlertTriangle
+            className={cn(iconClass)}
+            style={{ color: theme.colors.warning.main }}
+          />
+        );
       case 'info':
       default:
-        return <Info className="h-5 w-5 text-blue-600" />;
+        return (
+          <Info
+            className={cn(iconClass)}
+            style={{ color: theme.colors.primary.main }}
+          />
+        );
     }
   };
 
-  const getStyles = () => {
-    const baseStyles = 'border-l-4 bg-white shadow-lg rounded-lg p-4 max-w-sm';
+  const getToastStyles = () => {
+    const baseStyle = {
+      backgroundColor: theme.colors.surfaceElevated,
+      boxShadow: theme.colors.shadow.lg,
+      borderRadius: theme.borderRadius.lg,
+    };
+
     switch (toast.type) {
       case 'success':
-        return `${baseStyles} border-green-500`;
+        return { ...baseStyle, borderLeftColor: theme.colors.success.main };
       case 'error':
-        return `${baseStyles} border-red-500`;
+        return { ...baseStyle, borderLeftColor: theme.colors.error.main };
       case 'warning':
-        return `${baseStyles} border-yellow-500`;
+        return { ...baseStyle, borderLeftColor: theme.colors.warning.main };
       case 'info':
       default:
-        return `${baseStyles} border-blue-500`;
+        return { ...baseStyle, borderLeftColor: theme.colors.primary.main };
     }
   };
 
   return (
-    <div
-      className={`transform transition-all duration-300 ease-in-out mb-2 ${
-        isVisible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
-      }`}
-    >
-      <div className={getStyles()}>
-        <div className="flex items-start">
-          <div className="flex-shrink-0">{getIcon()}</div>
-          <div className="ml-3 flex-1">
-            <h3 className="font-medium text-gray-900 text-sm">{toast.title}</h3>
-            {toast.description && (
-              <p className="text-gray-600 text-xs mt-1">{toast.description}</p>
-            )}
+    <FadeIn direction="right" trigger={isVisible} duration={200}>
+      <ScaleIn duration={150}>
+        <div
+          className={cn(
+            'border-l-4 p-4 max-w-sm mb-2 transition-all duration-200',
+            'hover:scale-105 hover:shadow-xl cursor-pointer',
+          )}
+          style={getToastStyles()}
+        >
+          <div className="flex items-start">
+            <div className="flex-shrink-0">{getIcon()}</div>
+            <div className="ml-3 flex-1">
+              <h3
+                className="font-medium text-sm transition-colors duration-200"
+                style={{ color: theme.colors.text.primary }}
+              >
+                {toast.title}
+              </h3>
+              {toast.description && (
+                <p
+                  className="text-xs mt-1 transition-colors duration-200"
+                  style={{ color: theme.colors.text.secondary }}
+                >
+                  {toast.description}
+                </p>
+              )}
+            </div>
+            <button
+              onClick={() => {
+                setIsVisible(false);
+                setTimeout(() => onRemove(toast.id), 150);
+              }}
+              className={cn(
+                'ml-2 p-1 rounded-md transition-all duration-150',
+                'hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-1',
+              )}
+              style={{
+                color: theme.colors.text.muted,
+              }}
+              aria-label="Close notification"
+            >
+              <X className="h-4 w-4 transition-transform duration-150 hover:rotate-90" />
+            </button>
           </div>
-          <button
-            onClick={() => {
-              setIsVisible(false);
-              setTimeout(() => onRemove(toast.id), 150);
-            }}
-            className="ml-2 text-gray-400 hover:text-gray-600 focus:outline-none"
-          >
-            <XCircle className="h-4 w-4" />
-          </button>
         </div>
-      </div>
-    </div>
+      </ScaleIn>
+    </FadeIn>
   );
 };
 
@@ -101,10 +152,12 @@ export const ToastContainer: React.FC<ToastContainerProps> = ({
   onRemove,
 }) => {
   return (
-    <div className="fixed top-4 right-4 z-[10000] space-y-2">
-      {toasts.map((toast) => (
-        <ToastComponent key={toast.id} toast={toast} onRemove={onRemove} />
-      ))}
+    <div className="fixed top-4 right-4 z-[10000] space-y-2 pointer-events-none">
+      <div className="space-y-2 pointer-events-auto">
+        {toasts.map((toast) => (
+          <ToastComponent key={toast.id} toast={toast} onRemove={onRemove} />
+        ))}
+      </div>
     </div>
   );
 };

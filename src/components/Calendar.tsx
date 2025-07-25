@@ -10,6 +10,7 @@ import type {
   EventContentArg,
   CalendarApi,
   EventApi,
+  ViewApi,
 } from '@fullcalendar/core';
 
 import type { CalendarEvent, EventFormData } from '../types/event';
@@ -84,7 +85,7 @@ const Calendar: React.FC<CalendarProps> = ({
   } = useEventStore();
 
   // Custom hooks
-  const { theme, themeClasses } = useCalendarTheme(isDarkMode);
+  const { themeClasses } = useCalendarTheme(isDarkMode);
   const { isMobile } = useBreakpoint();
   const {
     tooltipState,
@@ -146,13 +147,7 @@ const Calendar: React.FC<CalendarProps> = ({
 
   // Compute events array directly for better reactivity
   const calendarEvents = useMemo(() => {
-    console.log(
-      '🗓️ Calendar: Computing events array, store events:',
-      events.length,
-    );
-
     if (propEvents) {
-      console.log('Calendar: Using prop events:', propEvents.length);
       return propEvents.map(eventUtils.toFullCalendarEvent);
     }
 
@@ -161,37 +156,15 @@ const Calendar: React.FC<CalendarProps> = ({
     const startDate = new Date(now.getFullYear(), now.getMonth() - 6, 1);
     const endDate = new Date(now.getFullYear(), now.getMonth() + 6, 31);
 
-    console.log('Calendar: Fetching events for range:', {
-      start: startDate.toISOString(),
-      end: endDate.toISOString(),
-    });
-
     const allEvents = getAllEventsWithRecurring(
       startDate.toISOString(),
       endDate.toISOString(),
     );
 
-    console.log('📊 Calendar: Found events in range:', allEvents.length);
     const fullCalendarEvents = allEvents.map(eventUtils.toFullCalendarEvent);
-    console.log(
-      '✨ Calendar: Transformed events for FullCalendar:',
-      fullCalendarEvents.length,
-    );
-
-    // Log event details for debugging
-    if (fullCalendarEvents.length > 0) {
-      console.log(
-        'Event details:',
-        fullCalendarEvents.map((e) => ({
-          id: e.id,
-          title: e.title,
-          start: e.start,
-          end: e.end,
-        })),
-      );
-    }
 
     return fullCalendarEvents;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [propEvents, events, getAllEventsWithRecurring]);
 
   // Handle recurring event actions
@@ -225,6 +198,7 @@ const Calendar: React.FC<CalendarProps> = ({
       setEventDialogOpen,
       setSelectedDateInfo,
       setSelectedEventId,
+      success,
     ],
   );
 
@@ -271,8 +245,7 @@ const Calendar: React.FC<CalendarProps> = ({
         eventToDelete: null,
         isLoading: false,
       });
-    } catch (error) {
-      console.error('Failed to delete event:', error);
+    } catch {
       setDeleteEventDialog((prev) => ({ ...prev, isLoading: false }));
     }
   }, [deleteEventDialog, deleteEvent]);
@@ -301,8 +274,7 @@ const Calendar: React.FC<CalendarProps> = ({
           eventsToDelete: [],
           isLoading: false,
         });
-      } catch (error) {
-        console.error('Failed to delete events:', error);
+      } catch {
         setBulkDeleteDialog((prev) => ({ ...prev, isLoading: false }));
       }
     },
@@ -356,7 +328,7 @@ const Calendar: React.FC<CalendarProps> = ({
         position: { x: 0, y: 0 },
       });
     },
-    [quickEditPopover, updateEvent],
+    [quickEditPopover, updateEvent, success],
   );
 
   const handleQuickEditOpenFull = useCallback(() => {
@@ -527,11 +499,23 @@ const Calendar: React.FC<CalendarProps> = ({
       eventContent: renderEventContent,
       eventDidMount: handleEventDidMount,
       eventWillUnmount: handleEventWillUnmount,
-      eventMouseEnter: (info: any) => {
+      eventMouseEnter: (info: {
+        event: EventApi;
+        el: HTMLElement;
+        jsEvent: MouseEvent;
+        view: unknown;
+      }) => {
         // Disable context menu on events to allow right-click for quick edit
         info.el.addEventListener('contextmenu', (e: Event) => {
           e.preventDefault();
-          handleEventClick(info);
+          // Create proper EventClickArg structure
+          const clickInfo = {
+            event: info.event,
+            el: info.el,
+            jsEvent: e as MouseEvent,
+            view: info.view as ViewApi,
+          } as EventClickArg;
+          handleEventClick(clickInfo);
         });
       },
       height: isMobile ? 'auto' : 650,
@@ -635,7 +619,6 @@ const Calendar: React.FC<CalendarProps> = ({
           calendarApi={getCalendarApi}
           currentView={calendarView}
           onViewChange={handleViewChange}
-          theme={theme as 'light' | 'dark'}
           isMobile={isMobile}
           enableAnimations={enableAnimations}
         />
@@ -674,15 +657,11 @@ const Calendar: React.FC<CalendarProps> = ({
             setSelectedEventId(null);
           }}
           onSave={(eventData: EventFormData) => {
-            console.log('🔄 Event Save Operation Started:', eventData);
-
             if (selectedEventId) {
               // Update existing event
-              console.log('📝 Updating existing event:', selectedEventId);
               const existingEvent = getEventById(selectedEventId);
               if (existingEvent && existingEvent.recurrence) {
                 // This is a recurring event, show the recurring event dialog
-                console.log('🔁 Handling recurring event update');
                 setRecurringEventDialog({
                   isOpen: true,
                   action: 'edit',
@@ -701,9 +680,7 @@ const Calendar: React.FC<CalendarProps> = ({
                   createdAt: existingEvent.createdAt,
                   updatedAt: new Date().toISOString(),
                 };
-                console.log('✅ Updating event in store:', updatedEvent);
                 updateEvent(selectedEventId, updatedEvent);
-                console.log('📅 Event updated successfully');
                 success(
                   'Event Updated',
                   `"${eventData.title}" has been updated successfully`,
@@ -711,16 +688,13 @@ const Calendar: React.FC<CalendarProps> = ({
               }
             } else {
               // Create new event
-              console.log('🆕 Creating new event');
               const newEvent = {
                 ...eventData,
                 id: eventUtils.generateId(),
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
               };
-              console.log('✅ Adding new event to store:', newEvent);
               addEvent(newEvent);
-              console.log('📅 New event added successfully');
               success(
                 'Event Created',
                 `"${eventData.title}" has been added to your calendar`,
@@ -731,10 +705,6 @@ const Calendar: React.FC<CalendarProps> = ({
             setEventDialogOpen(false);
             setSelectedDateInfo(null);
             setSelectedEventId(null);
-
-            console.log(
-              '🎯 Event operation completed, calendar should refresh automatically',
-            );
           }}
           onDelete={
             selectedEventId

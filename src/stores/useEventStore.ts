@@ -55,7 +55,6 @@ export const useEventStore = create<EventState>()(
 
         // Add new event
         addEvent: (eventData) => {
-          console.log('🏪 Store: Adding new event:', eventData.title);
           const newEvent: CalendarEvent = {
             ...eventData,
             id: eventUtils.generateId(),
@@ -65,22 +64,16 @@ export const useEventStore = create<EventState>()(
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
           };
-          console.log('🏪 Store: New event created with ID:', newEvent.id);
           set((state) => {
             const newState = {
               events: [...state.events, newEvent],
             };
-            console.log(
-              '🏪 Store: Events updated, new count:',
-              newState.events.length,
-            );
             return newState;
           });
         },
 
         // Update existing event
         updateEvent: (id, updates) => {
-          console.log('🏪 Store: Updating event:', id);
           set((state) => {
             const newState = {
               events: state.events.map((event) =>
@@ -93,10 +86,6 @@ export const useEventStore = create<EventState>()(
                   : event,
               ),
             };
-            console.log(
-              '🏪 Store: Event updated, total events:',
-              newState.events.length,
-            );
             return newState;
           });
         },
@@ -125,8 +114,6 @@ export const useEventStore = create<EventState>()(
 
         // Initialize with seed events (useful for development)
         initializeSeedEvents: () => {
-          console.log('Store: initializeSeedEvents called');
-          console.log('Store: Current events before:', get().events.length);
           const seedEvents: CalendarEvent[] = [
             {
               id: 'seed-1',
@@ -178,9 +165,7 @@ export const useEventStore = create<EventState>()(
             },
           ];
 
-          console.log('Store: Setting seed events:', seedEvents.length);
           set({ events: seedEvents });
-          console.log('Store: Events after set:', get().events.length);
         },
 
         // Search events by title or description
@@ -415,10 +400,10 @@ export const useEventStore = create<EventState>()(
 
 // Global debug functions (only in development)
 if (typeof window !== 'undefined') {
-  (window as any).debugEventStore = {
+  (window as unknown as Record<string, unknown>).debugEventStore = {
     addSeedEvents: () => useEventStore.getState().initializeSeedEvents(),
     clearEvents: () => useEventStore.getState().clearEvents(),
     getEvents: () => useEventStore.getState().events,
-    logEvents: () => console.log('Events:', useEventStore.getState().events),
+    logEvents: () => useEventStore.getState().events,
   };
 }

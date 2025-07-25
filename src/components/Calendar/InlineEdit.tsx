@@ -111,7 +111,7 @@ export const InlineEdit: React.FC<InlineEditProps> = ({
       <div className="flex items-start gap-2 w-full">
         <div className="flex-1">
           <InputComponent
-            ref={inputRef as any}
+            ref={inputRef as React.RefObject<HTMLInputElement>}
             value={editValue}
             onChange={(e) => setEditValue(e.target.value)}
             onKeyDown={handleKeyDown}

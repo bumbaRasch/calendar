@@ -5,6 +5,7 @@ import type { CalendarApi } from '@fullcalendar/core';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { ThemeToggle } from '../ThemeToggle';
+import { useThemeContext } from '../ThemeProvider';
 import { cn } from '../../lib/utils';
 
 type CalendarView =
@@ -17,7 +18,6 @@ interface CalendarToolbarProps {
   calendarApi: () => CalendarApi | null;
   currentView: string;
   onViewChange: (view: CalendarView) => void;
-  theme: 'light' | 'dark';
   isMobile: boolean;
   enableAnimations?: boolean;
 }
@@ -36,6 +36,7 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
   isMobile,
   enableAnimations = true,
 }) => {
+  const { theme } = useThemeContext();
   const api = calendarApi();
   const currentDate = api?.getDate();
   const title = api?.view.title || '';
@@ -60,10 +61,14 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
       className={cn(
         'calendar-toolbar flex flex-col sm:flex-row',
         'items-start sm:items-center justify-between',
-        'p-4 border-b border-gray-200 dark:border-gray-700',
-        'bg-gray-50/50 dark:bg-gray-800/50',
-        enableAnimations && 'transition-colors duration-200',
+        'p-4 border-b',
+        enableAnimations && 'transition-all duration-200',
       )}
+      style={{
+        backgroundColor: theme.colors.surface,
+        borderColor: theme.colors.border.default,
+        boxShadow: theme.colors.shadow.sm,
+      }}
     >
       {/* Left Section - Navigation */}
       <div className="flex items-center gap-2 mb-3 sm:mb-0">
@@ -74,10 +79,17 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
             onClick={handlePrev}
             className={cn(
               'h-8 w-8 p-0',
-              'hover:bg-primary-50 hover:border-primary-200',
-              'dark:hover:bg-primary-900/20 dark:hover:border-primary-800',
-              enableAnimations && 'transition-all duration-200',
+              enableAnimations && 'transition-all duration-200 hover:scale-105',
             )}
+            style={{
+              borderColor: theme.colors.border.default,
+              color: theme.colors.text.primary,
+              ':hover': {
+                backgroundColor: theme.colors.primary.bg,
+                borderColor: theme.colors.primary.main,
+                color: theme.colors.primary.main,
+              },
+            }}
             aria-label="Previous period"
           >
             <ChevronLeftIcon className="h-4 w-4" />
@@ -89,10 +101,17 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
             onClick={handleNext}
             className={cn(
               'h-8 w-8 p-0',
-              'hover:bg-primary-50 hover:border-primary-200',
-              'dark:hover:bg-primary-900/20 dark:hover:border-primary-800',
-              enableAnimations && 'transition-all duration-200',
+              enableAnimations && 'transition-all duration-200 hover:scale-105',
             )}
+            style={{
+              borderColor: theme.colors.border.default,
+              color: theme.colors.text.primary,
+              ':hover': {
+                backgroundColor: theme.colors.primary.bg,
+                borderColor: theme.colors.primary.main,
+                color: theme.colors.primary.main,
+              },
+            }}
             aria-label="Next period"
           >
             <ChevronRightIcon className="h-4 w-4" />
@@ -104,11 +123,17 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
             onClick={handleToday}
             className={cn(
               'px-3 h-8 text-xs font-medium',
-              'hover:bg-primary-50 hover:border-primary-200 hover:text-primary-700',
-              'dark:hover:bg-primary-900/20 dark:hover:border-primary-800',
-              'dark:hover:text-primary-300',
-              enableAnimations && 'transition-all duration-200',
+              enableAnimations && 'transition-all duration-200 hover:scale-105',
             )}
+            style={{
+              borderColor: theme.colors.border.default,
+              color: theme.colors.text.primary,
+              ':hover': {
+                backgroundColor: theme.colors.primary.bg,
+                borderColor: theme.colors.primary.main,
+                color: theme.colors.primary.main,
+              },
+            }}
           >
             Today
           </Button>
@@ -116,14 +141,25 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
 
         {/* Current Period Title */}
         <div className="flex items-center gap-2 ml-4">
-          <CalendarIcon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          <CalendarIcon
+            className="h-4 w-4 transition-colors duration-200"
+            style={{ color: theme.colors.text.muted }}
+          />
+          <h2
+            className="text-lg font-semibold transition-colors duration-200"
+            style={{ color: theme.colors.text.primary }}
+          >
             {formatTitle(title)}
           </h2>
           {currentDate && (
             <Badge
               variant="secondary"
-              className="text-xs font-normal hidden sm:inline-flex"
+              className="text-xs font-normal hidden sm:inline-flex transition-all duration-200"
+              style={{
+                backgroundColor: theme.colors.secondary.bg,
+                color: theme.colors.secondary.main,
+                borderColor: theme.colors.border.muted,
+              }}
             >
               {currentDate.toLocaleDateString('en-US', {
                 weekday: 'short',
@@ -140,11 +176,15 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
         {/* View Switcher */}
         <div
           className={cn(
-            'inline-flex items-center rounded-lg',
-            'border border-gray-200 dark:border-gray-700',
-            'bg-white dark:bg-gray-800 p-1 shadow-sm',
+            'inline-flex items-center rounded-lg p-1',
             enableAnimations && 'transition-all duration-200',
           )}
+          style={{
+            backgroundColor: theme.colors.surfaceElevated,
+            border: `1px solid ${theme.colors.border.default}`,
+            boxShadow: theme.colors.shadow.sm,
+            borderRadius: theme.borderRadius.lg,
+          }}
         >
           {viewButtons.map((button) => (
             <button
@@ -153,20 +193,33 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
               className={cn(
                 'relative inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md',
                 'text-sm font-medium transition-all duration-200',
-                'focus:outline-none focus:ring-2 focus:ring-primary-200 focus:ring-offset-2',
-                'dark:focus:ring-primary-800 dark:focus:ring-offset-gray-900',
+                'focus:outline-none focus:ring-2 focus:ring-offset-2',
+                'hover:scale-105',
                 actualCurrentView === button.key
-                  ? [
-                      'bg-blue-600 text-white shadow-md font-semibold',
-                      'dark:bg-blue-500 ring-2 ring-blue-300 dark:ring-blue-400',
-                      enableAnimations && 'transform scale-[1.02]',
-                    ]
-                  : [
-                      'text-gray-700 dark:text-gray-300',
-                      'hover:bg-gray-100 dark:hover:bg-gray-700',
-                      'hover:text-gray-900 dark:hover:text-gray-100',
-                    ],
+                  ? 'font-semibold shadow-md'
+                  : 'hover:shadow-sm',
               )}
+              style={{
+                backgroundColor:
+                  actualCurrentView === button.key
+                    ? theme.colors.primary.main
+                    : 'transparent',
+                color:
+                  actualCurrentView === button.key
+                    ? theme.colors.primary.text
+                    : theme.colors.text.primary,
+                borderRadius: theme.borderRadius.md,
+                ':hover':
+                  actualCurrentView !== button.key
+                    ? {
+                        backgroundColor: theme.colors.primary.bg,
+                        color: theme.colors.primary.main,
+                      }
+                    : {},
+                ':focus': {
+                  ringColor: theme.colors.border.focus,
+                },
+              }}
               aria-label={`Switch to ${button.label} view`}
               aria-pressed={actualCurrentView === button.key}
             >
@@ -177,7 +230,13 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
                 {isMobile ? button.shortLabel : button.label}
               </span>
               {actualCurrentView === button.key && enableAnimations && (
-                <div className="absolute inset-0 rounded-md bg-white/20 animate-pulse" />
+                <div
+                  className="absolute inset-0 rounded-md animate-pulse"
+                  style={{
+                    backgroundColor: theme.colors.primary.text + '20',
+                    borderRadius: theme.borderRadius.md,
+                  }}
+                />
               )}
             </button>
           ))}
@@ -187,7 +246,7 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
         <ThemeToggle
           size={isMobile ? 'sm' : 'md'}
           variant="outline"
-          className="border-gray-200 dark:border-gray-700"
+          className="transition-all duration-200 hover:scale-105"
         />
       </div>
     </div>
