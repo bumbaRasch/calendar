@@ -37,6 +37,9 @@ import { QuickEditPopover } from './Calendar/QuickEditPopover';
 import { useCalendarTheme } from './Calendar/hooks/useCalendarTheme';
 import { useEventTooltip } from './Calendar/hooks/useEventTooltip';
 import { useKeyboardShortcuts } from './Calendar/hooks/useKeyboardShortcuts';
+import { KeyboardShortcutsDialog } from './Calendar/KeyboardShortcutsDialog';
+import { KeyboardShortcutsOverlay } from './Calendar/KeyboardShortcutsOverlay';
+import { useKeyboardShortcutsOverlay } from './Calendar/hooks/useKeyboardShortcutsOverlay';
 import { useBreakpoint } from '../hooks/useBreakpoint';
 import { cn } from '../lib/utils';
 import { TooltipProvider } from './ui/tooltip';
@@ -108,6 +111,22 @@ const Calendar: React.FC<CalendarProps> = ({
     new Set(),
   );
   const [showSearchResults, setShowSearchResults] = useState(false);
+
+  // Keyboard shortcuts dialog state
+  const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
+
+  // Keyboard shortcuts overlay
+  const {
+    isVisible: isOverlayVisible,
+    context: overlayContext,
+    hideOverlay,
+    trackNavigation,
+    trackSearch,
+    trackEventAction,
+    trackViewChange,
+  } = useKeyboardShortcutsOverlay({
+    isEnabled: !isMobile, // Disable on mobile devices
+  });
 
   // Events are now reactive through calendarEvents useMemo
 
@@ -394,8 +413,11 @@ const Calendar: React.FC<CalendarProps> = ({
       setSearchResults(results);
       setHighlightedEventIds(new Set(results.map((event) => event.id)));
       setShowSearchResults(results.length > 0);
+
+      // Track search action for overlay
+      trackSearch();
     },
-    [searchEventsAdvanced],
+    [searchEventsAdvanced, trackSearch],
   );
 
   // Handle search result click
@@ -441,6 +463,40 @@ const Calendar: React.FC<CalendarProps> = ({
     setShowSearchResults(false);
   }, []);
 
+  // Handle create event via keyboard shortcut
+  const handleCreateEvent = useCallback(() => {
+    setSelectedEventId(null);
+    setSelectedDateInfo(null);
+    setEventDialogOpen(true);
+
+    // Track event action for overlay
+    trackEventAction();
+  }, [
+    setSelectedEventId,
+    setSelectedDateInfo,
+    setEventDialogOpen,
+    trackEventAction,
+  ]);
+
+  // Handle refresh calendar
+  const handleRefreshCalendar = useCallback(() => {
+    // Force a re-render by clearing and resetting highlighted events
+    setHighlightedEventIds(new Set());
+
+    // Show a brief success message
+    success(
+      'Calendar Refreshed',
+      'The calendar has been refreshed successfully',
+    );
+  }, [success]);
+
+  // Handle toggle theme (if theme context is available)
+  const handleToggleTheme = useCallback(() => {
+    // This would typically toggle the theme through a theme context
+    // For now, we'll just show a message that this feature is coming
+    success('Theme Toggle', 'Theme switching coming soon!');
+  }, [success]);
+
   // Get calendar API for programmatic control
   const getCalendarApi = useCallback(
     (): CalendarApi | null => calendarRef.current?.getApi() || null,
@@ -452,8 +508,11 @@ const Calendar: React.FC<CalendarProps> = ({
     (view: CalendarView) => {
       setCalendarView(view);
       localStorage.setItem('calendar-view', view);
+
+      // Track view change for overlay
+      trackViewChange();
     },
-    [setCalendarView],
+    [setCalendarView, trackViewChange],
   );
 
   // Keyboard shortcuts
@@ -466,6 +525,11 @@ const Calendar: React.FC<CalendarProps> = ({
     selectedEventId,
     onFocusSearch: handleSearchFocus,
     onClearSearch: handleSearchClear,
+    onShowHelp: () => setShowKeyboardShortcuts(true),
+    onCreateEvent: handleCreateEvent,
+    onToggleTheme: handleToggleTheme,
+    onRefresh: handleRefreshCalendar,
+    onTrackNavigation: trackNavigation,
   });
 
   const handleDateSelect = useCallback(
@@ -708,9 +772,11 @@ const Calendar: React.FC<CalendarProps> = ({
       >
         {/* Screen reader help text */}
         <div id="calendar-help" className="sr-only">
-          Use arrow keys or H/L to navigate between periods. Press T for today.
-          Use Alt+1-4 to switch views: Alt+1 for month, Alt+2 for week, Alt+3
-          for day, Alt+4 for list. Press Escape to close dialogs.
+          Use arrow keys, H/L, or J/K to navigate between periods. Press T for
+          today. Use N or C to create new events. Use Alt+1-4 to switch views:
+          Alt+1 for month, Alt+2 for week, Alt+3 for day, Alt+4 for list. Press
+          ? to show all keyboard shortcuts. Press Escape to close dialogs. Use
+          Ctrl+F to search events.
         </div>
 
         {/* Enhanced Custom Toolbar */}
@@ -934,6 +1000,19 @@ const Calendar: React.FC<CalendarProps> = ({
 
         {/* Toast Notifications */}
         <ToastContainer toasts={toasts} onRemove={removeToast} />
+
+        {/* Keyboard Shortcuts Dialog */}
+        <KeyboardShortcutsDialog
+          isOpen={showKeyboardShortcuts}
+          onClose={() => setShowKeyboardShortcuts(false)}
+        />
+
+        {/* Keyboard Shortcuts Overlay */}
+        <KeyboardShortcutsOverlay
+          isVisible={isOverlayVisible}
+          context={overlayContext}
+          onDismiss={hideOverlay}
+        />
       </div>
     </TooltipProvider>
   );

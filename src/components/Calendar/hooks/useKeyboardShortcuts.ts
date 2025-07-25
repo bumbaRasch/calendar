@@ -10,6 +10,11 @@ interface UseKeyboardShortcutsProps {
   selectedEventId?: string | null;
   onFocusSearch?: () => void;
   onClearSearch?: () => void;
+  onShowHelp?: () => void;
+  onCreateEvent?: () => void;
+  onToggleTheme?: () => void;
+  onRefresh?: () => void;
+  onTrackNavigation?: () => void;
 }
 
 export const useKeyboardShortcuts = ({
@@ -20,6 +25,11 @@ export const useKeyboardShortcuts = ({
   selectedEventId,
   onFocusSearch,
   onClearSearch,
+  onShowHelp,
+  onCreateEvent,
+  onToggleTheme,
+  onRefresh,
+  onTrackNavigation,
 }: UseKeyboardShortcutsProps) => {
   const handleKeyPress = useCallback(
     (event: KeyboardEvent) => {
@@ -48,15 +58,66 @@ export const useKeyboardShortcuts = ({
           case 'h':
             event.preventDefault();
             api.prev();
+            onTrackNavigation?.();
             break;
           case 'arrowright':
           case 'l':
             event.preventDefault();
             api.next();
+            onTrackNavigation?.();
             break;
           case 't':
             event.preventDefault();
             api.today();
+            onTrackNavigation?.();
+            break;
+          case '?':
+            // Show keyboard shortcuts help dialog
+            if (onShowHelp) {
+              event.preventDefault();
+              onShowHelp();
+            }
+            break;
+          case 'n':
+          case 'c':
+            // Create new event
+            if (onCreateEvent) {
+              event.preventDefault();
+              onCreateEvent();
+            }
+            break;
+          case 'r':
+            // Refresh calendar
+            if (onRefresh) {
+              event.preventDefault();
+              onRefresh();
+            }
+            break;
+          case 'j':
+            // Next day (alternative to arrow right)
+            event.preventDefault();
+            if (api.view.type === 'dayGridMonth') {
+              const currentDate = api.getDate();
+              const nextDay = new Date(currentDate);
+              nextDay.setDate(nextDay.getDate() + 1);
+              api.gotoDate(nextDay);
+            } else {
+              api.next();
+            }
+            onTrackNavigation?.();
+            break;
+          case 'k':
+            // Previous day (alternative to arrow left)
+            event.preventDefault();
+            if (api.view.type === 'dayGridMonth') {
+              const currentDate = api.getDate();
+              const prevDay = new Date(currentDate);
+              prevDay.setDate(prevDay.getDate() - 1);
+              api.gotoDate(prevDay);
+            } else {
+              api.prev();
+            }
+            onTrackNavigation?.();
             break;
           case 'escape':
             event.preventDefault();
@@ -117,6 +178,40 @@ export const useKeyboardShortcuts = ({
               onFocusSearch();
             }
             break;
+          case 'n':
+            // Create new event
+            if (onCreateEvent) {
+              event.preventDefault();
+              onCreateEvent();
+            }
+            break;
+          case 'r':
+            // Refresh calendar
+            if (onRefresh) {
+              event.preventDefault();
+              onRefresh();
+            }
+            break;
+          case ',':
+            // Toggle theme (Ctrl/Cmd + comma for settings)
+            if (onToggleTheme) {
+              event.preventDefault();
+              onToggleTheme();
+            }
+            break;
+        }
+      }
+
+      // Shortcuts with Shift modifier
+      if (isShift && !isCtrlOrCmd && !isAlt) {
+        switch (key) {
+          case '?':
+            // Show keyboard shortcuts help dialog (Shift + ?)
+            if (onShowHelp) {
+              event.preventDefault();
+              onShowHelp();
+            }
+            break;
         }
       }
     },
@@ -127,6 +222,11 @@ export const useKeyboardShortcuts = ({
       selectedEventId,
       onFocusSearch,
       onClearSearch,
+      onShowHelp,
+      onCreateEvent,
+      onToggleTheme,
+      onRefresh,
+      onTrackNavigation,
     ],
   );
 
@@ -143,6 +243,8 @@ export const useKeyboardShortcuts = ({
       navigation: [
         { keys: ['←', 'H'], description: 'Previous period' },
         { keys: ['→', 'L'], description: 'Next period' },
+        { keys: ['J'], description: 'Next day' },
+        { keys: ['K'], description: 'Previous day' },
         { keys: ['T'], description: 'Go to today' },
         { keys: ['Esc'], description: 'Close dialogs' },
         { keys: ['Del', 'Backspace'], description: 'Delete selected event' },
@@ -153,9 +255,22 @@ export const useKeyboardShortcuts = ({
         { keys: ['Alt+3', 'Alt+D'], description: 'Day view' },
         { keys: ['Alt+4', 'Alt+L'], description: 'List view' },
       ],
+      eventActions: [
+        { keys: ['N', 'C'], description: 'Create new event' },
+        { keys: ['Ctrl+N', 'Cmd+N'], description: 'Create new event' },
+        { keys: ['Del', 'Backspace'], description: 'Delete selected event' },
+        {
+          keys: ['Ctrl+Click', 'Right Click'],
+          description: 'Quick edit event',
+        },
+      ],
       advanced: [
         { keys: ['Ctrl+K', 'Cmd+K'], description: 'Command palette (future)' },
         { keys: ['Ctrl+F', 'Cmd+F'], description: 'Focus search' },
+        { keys: ['Ctrl+R', 'Cmd+R'], description: 'Refresh calendar' },
+        { keys: ['Ctrl+,', 'Cmd+,'], description: 'Toggle theme' },
+        { keys: ['?', 'Shift+?'], description: 'Show keyboard shortcuts' },
+        { keys: ['R'], description: 'Refresh calendar' },
         { keys: ['Esc'], description: 'Clear search' },
       ],
     },
