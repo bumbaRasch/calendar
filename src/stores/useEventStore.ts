@@ -55,6 +55,7 @@ export const useEventStore = create<EventState>()(
 
         // Add new event
         addEvent: (eventData) => {
+          console.log('🏪 Store: Adding new event:', eventData.title);
           const newEvent: CalendarEvent = {
             ...eventData,
             id: eventUtils.generateId(),
@@ -64,20 +65,40 @@ export const useEventStore = create<EventState>()(
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
           };
-          set((state) => ({
-            events: [...state.events, newEvent],
-          }));
+          console.log('🏪 Store: New event created with ID:', newEvent.id);
+          set((state) => {
+            const newState = {
+              events: [...state.events, newEvent],
+            };
+            console.log(
+              '🏪 Store: Events updated, new count:',
+              newState.events.length,
+            );
+            return newState;
+          });
         },
 
         // Update existing event
         updateEvent: (id, updates) => {
-          set((state) => ({
-            events: state.events.map((event) =>
-              event.id === id
-                ? { ...event, ...updates, updatedAt: new Date().toISOString() }
-                : event,
-            ),
-          }));
+          console.log('🏪 Store: Updating event:', id);
+          set((state) => {
+            const newState = {
+              events: state.events.map((event) =>
+                event.id === id
+                  ? {
+                      ...event,
+                      ...updates,
+                      updatedAt: new Date().toISOString(),
+                    }
+                  : event,
+              ),
+            };
+            console.log(
+              '🏪 Store: Event updated, total events:',
+              newState.events.length,
+            );
+            return newState;
+          });
         },
 
         // Delete event

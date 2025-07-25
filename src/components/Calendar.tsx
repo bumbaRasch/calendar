@@ -34,6 +34,7 @@ import { useKeyboardShortcuts } from './Calendar/hooks/useKeyboardShortcuts';
 import { useBreakpoint } from '../hooks/useBreakpoint';
 import { cn } from '../lib/utils';
 import { TooltipProvider } from './ui/tooltip';
+import { ToastContainer, useToast } from './ui/toast';
 
 interface CalendarProps {
   events?: CalendarEvent[];
@@ -91,6 +92,7 @@ const Calendar: React.FC<CalendarProps> = ({
     handleEventMouseEnter,
     handleEventMouseLeave,
   } = useEventTooltip(500);
+  const { toasts, removeToast, success } = useToast();
 
   // Events are now reactive through calendarEvents useMemo
 
@@ -145,7 +147,7 @@ const Calendar: React.FC<CalendarProps> = ({
   // Compute events array directly for better reactivity
   const calendarEvents = useMemo(() => {
     console.log(
-      'Calendar: Computing events array, store events:',
+      '🗓️ Calendar: Computing events array, store events:',
       events.length,
     );
 
@@ -169,9 +171,25 @@ const Calendar: React.FC<CalendarProps> = ({
       endDate.toISOString(),
     );
 
-    console.log('Calendar: Found events in range:', allEvents.length);
+    console.log('📊 Calendar: Found events in range:', allEvents.length);
     const fullCalendarEvents = allEvents.map(eventUtils.toFullCalendarEvent);
-    console.log('Calendar: Transformed events:', fullCalendarEvents);
+    console.log(
+      '✨ Calendar: Transformed events for FullCalendar:',
+      fullCalendarEvents.length,
+    );
+
+    // Log event details for debugging
+    if (fullCalendarEvents.length > 0) {
+      console.log(
+        'Event details:',
+        fullCalendarEvents.map((e) => ({
+          id: e.id,
+          title: e.title,
+          start: e.start,
+          end: e.end,
+        })),
+      );
+    }
 
     return fullCalendarEvents;
   }, [propEvents, events, getAllEventsWithRecurring]);
@@ -183,8 +201,16 @@ const Calendar: React.FC<CalendarProps> = ({
 
       if (action === 'edit' && pendingData) {
         updateRecurringEvent(eventId, pendingData, scope);
+        success(
+          'Recurring Event Updated',
+          'The recurring event has been updated successfully',
+        );
       } else if (action === 'delete') {
         deleteRecurringEvent(eventId, scope);
+        success(
+          'Recurring Event Deleted',
+          'The recurring event has been deleted successfully',
+        );
       }
 
       // Close dialogs and reset state
@@ -318,6 +344,10 @@ const Calendar: React.FC<CalendarProps> = ({
           updatedAt: new Date().toISOString(),
         };
         updateEvent(event.id, updatedEvent);
+        success(
+          'Event Updated',
+          `"${eventData.title || event.title}" has been updated`,
+        );
       }
 
       setQuickEditPopover({
@@ -644,11 +674,15 @@ const Calendar: React.FC<CalendarProps> = ({
             setSelectedEventId(null);
           }}
           onSave={(eventData: EventFormData) => {
+            console.log('🔄 Event Save Operation Started:', eventData);
+
             if (selectedEventId) {
               // Update existing event
+              console.log('📝 Updating existing event:', selectedEventId);
               const existingEvent = getEventById(selectedEventId);
               if (existingEvent && existingEvent.recurrence) {
                 // This is a recurring event, show the recurring event dialog
+                console.log('🔁 Handling recurring event update');
                 setRecurringEventDialog({
                   isOpen: true,
                   action: 'edit',
@@ -667,23 +701,40 @@ const Calendar: React.FC<CalendarProps> = ({
                   createdAt: existingEvent.createdAt,
                   updatedAt: new Date().toISOString(),
                 };
+                console.log('✅ Updating event in store:', updatedEvent);
                 updateEvent(selectedEventId, updatedEvent);
+                console.log('📅 Event updated successfully');
+                success(
+                  'Event Updated',
+                  `"${eventData.title}" has been updated successfully`,
+                );
               }
             } else {
               // Create new event
+              console.log('🆕 Creating new event');
               const newEvent = {
                 ...eventData,
                 id: eventUtils.generateId(),
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
               };
+              console.log('✅ Adding new event to store:', newEvent);
               addEvent(newEvent);
+              console.log('📅 New event added successfully');
+              success(
+                'Event Created',
+                `"${eventData.title}" has been added to your calendar`,
+              );
             }
 
             // Close dialog and reset state
             setEventDialogOpen(false);
             setSelectedDateInfo(null);
             setSelectedEventId(null);
+
+            console.log(
+              '🎯 Event operation completed, calendar should refresh automatically',
+            );
           }}
           onDelete={
             selectedEventId
@@ -793,6 +844,9 @@ const Calendar: React.FC<CalendarProps> = ({
             onOpenFullEdit={handleQuickEditOpenFull}
           />
         )}
+
+        {/* Toast Notifications */}
+        <ToastContainer toasts={toasts} onRemove={removeToast} />
       </div>
     </TooltipProvider>
   );
