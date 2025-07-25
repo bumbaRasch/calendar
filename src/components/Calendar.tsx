@@ -1,4 +1,4 @@
-import React, { useRef, useCallback, useMemo } from 'react';
+import React, { useRef, useCallback, useMemo, useState } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -20,6 +20,11 @@ import { CalendarToolbar } from './Calendar/CalendarToolbar';
 import { CustomEventContent } from './Calendar/CustomEventContent';
 import { EventTooltip } from './Calendar/EventTooltip';
 import { EventDialog } from './Calendar/EventDialog';
+import {
+  RecurringEventDialog,
+  type RecurringEventAction,
+  type RecurringEventScope,
+} from './Calendar/RecurringEventDialog';
 import { useCalendarTheme } from './Calendar/hooks/useCalendarTheme';
 import { useEventTooltip } from './Calendar/hooks/useEventTooltip';
 import { useKeyboardShortcuts } from './Calendar/hooks/useKeyboardShortcuts';
@@ -64,10 +69,12 @@ const Calendar: React.FC<CalendarProps> = ({
     isDarkMode,
   } = useUIStore();
   const {
-    events: storeEvents,
     addEvent,
     updateEvent,
     getEventById,
+    getAllEventsWithRecurring,
+    updateRecurringEvent,
+    deleteRecurringEvent,
   } = useEventStore();
 
   // Custom hooks
@@ -80,8 +87,66 @@ const Calendar: React.FC<CalendarProps> = ({
     handleEventMouseLeave,
   } = useEventTooltip(500);
 
-  // Use store events if no props events provided
-  const events = propEvents || storeEvents;
+  // Recurring event dialog state
+  const [recurringEventDialog, setRecurringEventDialog] = useState<{
+    isOpen: boolean;
+    action: RecurringEventAction;
+    eventId: string;
+    eventTitle: string;
+    isRecurringInstance: boolean;
+    pendingData?: EventFormData;
+  }>({
+    isOpen: false,
+    action: 'edit',
+    eventId: '',
+    eventTitle: '',
+    isRecurringInstance: false,
+  });
+
+  // Create event fetcher function for FullCalendar
+  const getEventsForRange = useCallback(
+    (fetchInfo: { start: Date; end: Date }) => {
+      if (propEvents) {
+        // If prop events are provided, use them directly
+        return propEvents.map(eventUtils.toFullCalendarEvent);
+      }
+
+      // Otherwise, get events from store including recurring instances
+      const allEvents = getAllEventsWithRecurring(
+        fetchInfo.start.toISOString(),
+        fetchInfo.end.toISOString(),
+      );
+
+      return allEvents.map(eventUtils.toFullCalendarEvent);
+    },
+    [propEvents, getAllEventsWithRecurring],
+  );
+
+  // Handle recurring event actions
+  const handleRecurringEventAction = useCallback(
+    (scope: RecurringEventScope) => {
+      const { action, eventId, pendingData } = recurringEventDialog;
+
+      if (action === 'edit' && pendingData) {
+        updateRecurringEvent(eventId, pendingData, scope);
+      } else if (action === 'delete') {
+        deleteRecurringEvent(eventId, scope);
+      }
+
+      // Close dialogs and reset state
+      setEventDialogOpen(false);
+      setSelectedDateInfo(null);
+      setSelectedEventId(null);
+    },
+    [
+      recurringEventDialog,
+      updateRecurringEvent,
+      deleteRecurringEvent,
+      setEventDialogOpen,
+      setSelectedDateInfo,
+      setSelectedEventId,
+    ],
+  );
 
   // Get calendar API for programmatic control
   const getCalendarApi = useCallback(
@@ -205,7 +270,7 @@ const Calendar: React.FC<CalendarProps> = ({
       selectMirror: true,
       dayMaxEvents: isMobile ? 2 : 4,
       weekends: true,
-      events: events ? events.map(eventUtils.toFullCalendarEvent) : [],
+      events: getEventsForRange,
       select: handleDateSelect,
       eventClick: handleEventClick,
       eventContent: renderEventContent,
@@ -276,7 +341,7 @@ const Calendar: React.FC<CalendarProps> = ({
     [
       calendarView,
       isMobile,
-      events,
+      getEventsForRange,
       handleDateSelect,
       handleEventClick,
       renderEventContent,
@@ -354,7 +419,19 @@ const Calendar: React.FC<CalendarProps> = ({
             if (selectedEventId) {
               // Update existing event
               const existingEvent = getEventById(selectedEventId);
-              if (existingEvent) {
+              if (existingEvent && existingEvent.recurrence) {
+                // This is a recurring event, show the recurring event dialog
+                setRecurringEventDialog({
+                  isOpen: true,
+                  action: 'edit',
+                  eventId: selectedEventId,
+                  eventTitle: existingEvent.title,
+                  isRecurringInstance: !!existingEvent.recurrence.parentEventId,
+                  pendingData: eventData,
+                });
+                return;
+              } else if (existingEvent) {
+                // Regular event update
                 const updatedEvent: CalendarEvent = {
                   ...existingEvent,
                   ...eventData,
@@ -374,6 +451,11 @@ const Calendar: React.FC<CalendarProps> = ({
               };
               addEvent(newEvent);
             }
+
+            // Close dialog and reset state
+            setEventDialogOpen(false);
+            setSelectedDateInfo(null);
+            setSelectedEventId(null);
           }}
           initialData={
             selectedEventId
@@ -399,6 +481,7 @@ const Calendar: React.FC<CalendarProps> = ({
                       location: event.location,
                       attendees: event.attendees,
                       url: event.url,
+                      recurrence: event.recurrence,
                     };
                   }
                   return undefined;
@@ -406,6 +489,18 @@ const Calendar: React.FC<CalendarProps> = ({
               : undefined
           }
           selectedDateInfo={selectedDateInfo}
+        />
+
+        {/* Recurring Event Dialog */}
+        <RecurringEventDialog
+          isOpen={recurringEventDialog.isOpen}
+          onClose={() =>
+            setRecurringEventDialog((prev) => ({ ...prev, isOpen: false }))
+          }
+          onConfirm={handleRecurringEventAction}
+          action={recurringEventDialog.action}
+          eventTitle={recurringEventDialog.eventTitle}
+          isRecurringInstance={recurringEventDialog.isRecurringInstance}
         />
       </div>
     </TooltipProvider>

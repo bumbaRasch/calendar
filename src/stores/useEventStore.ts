@@ -7,6 +7,8 @@ import {
   EventStatus,
   eventUtils,
 } from '../types/event';
+import { RecurrenceEngine } from '../utils/recurrenceEngine';
+import { RecurrenceEndType } from '../types/recurrence';
 
 interface EventState {
   // Events data
@@ -27,6 +29,18 @@ interface EventState {
   // Event filtering and searching
   searchEvents: (query: string) => CalendarEvent[];
   getEventsInRange: (start: string, end: string) => CalendarEvent[];
+
+  // Recurring event operations
+  updateRecurringEvent: (
+    id: string,
+    updates: Partial<CalendarEvent>,
+    updateType: 'this' | 'thisAndFuture' | 'all',
+  ) => void;
+  deleteRecurringEvent: (
+    id: string,
+    deleteType: 'this' | 'thisAndFuture' | 'all',
+  ) => void;
+  getAllEventsWithRecurring: (start: string, end: string) => CalendarEvent[];
 }
 
 // Use the ID generator from eventUtils
@@ -112,6 +126,197 @@ export const useEventStore = create<EventState>()(
               (eventStart <= startDate && eventEnd >= endDate)
             );
           });
+        },
+
+        // Update recurring event
+        updateRecurringEvent: (id, updates, updateType) => {
+          const event = get().getEventById(id);
+          if (!event) return;
+
+          if (updateType === 'this') {
+            // Update only this instance
+            if (event.recurrence?.parentEventId) {
+              // This is an instance, update the parent's modifications
+              const parentEvent = get().getEventById(
+                event.recurrence.parentEventId,
+              );
+              if (parentEvent && parentEvent.recurrence) {
+                const modifications =
+                  parentEvent.recurrence.modifications || [];
+                const existingMod = modifications.find(
+                  (mod) => mod.originalDate === event.recurrence?.instanceDate,
+                );
+
+                if (existingMod) {
+                  existingMod.modifiedEvent = {
+                    ...existingMod.modifiedEvent,
+                    ...updates,
+                  };
+                } else {
+                  modifications.push({
+                    originalDate: event.recurrence.instanceDate!,
+                    modifiedEvent: updates,
+                  });
+                }
+
+                set((state) => ({
+                  events: state.events.map((e) =>
+                    e.id === parentEvent.id
+                      ? {
+                          ...e,
+                          recurrence: {
+                            ...e.recurrence!,
+                            modifications,
+                          },
+                        }
+                      : e,
+                  ),
+                }));
+              }
+            }
+          } else if (updateType === 'thisAndFuture') {
+            // Update this and all future instances
+            // This would require creating a new recurring event starting from this date
+            // For now, we'll update the parent event
+            if (event.recurrence?.parentEventId) {
+              const parentId = event.recurrence.parentEventId;
+              get().updateEvent(parentId, updates);
+            } else {
+              get().updateEvent(id, updates);
+            }
+          } else {
+            // Update all instances
+            const parentId = event.recurrence?.parentEventId || id;
+            get().updateEvent(parentId, updates);
+          }
+        },
+
+        // Delete recurring event
+        deleteRecurringEvent: (id, deleteType) => {
+          const event = get().getEventById(id);
+          if (!event) return;
+
+          if (deleteType === 'this') {
+            // Delete only this instance
+            if (
+              event.recurrence?.parentEventId &&
+              event.recurrence.instanceDate
+            ) {
+              // Mark this instance as deleted in the parent's modifications
+              const parentEvent = get().getEventById(
+                event.recurrence.parentEventId,
+              );
+              if (parentEvent && parentEvent.recurrence) {
+                const modifications =
+                  parentEvent.recurrence.modifications || [];
+                const existingMod = modifications.find(
+                  (mod) => mod.originalDate === event.recurrence?.instanceDate,
+                );
+
+                if (existingMod) {
+                  existingMod.isDeleted = true;
+                } else {
+                  modifications.push({
+                    originalDate: event.recurrence.instanceDate,
+                    isDeleted: true,
+                  });
+                }
+
+                set((state) => ({
+                  events: state.events.map((e) =>
+                    e.id === parentEvent.id
+                      ? {
+                          ...e,
+                          recurrence: {
+                            ...e.recurrence!,
+                            modifications,
+                          },
+                        }
+                      : e,
+                  ),
+                }));
+              }
+            }
+          } else if (deleteType === 'thisAndFuture') {
+            // Delete this and all future instances
+            // This would require updating the recurrence end date
+            if (
+              event.recurrence?.parentEventId &&
+              event.recurrence.instanceDate
+            ) {
+              const parentEvent = get().getEventById(
+                event.recurrence.parentEventId,
+              );
+              if (parentEvent && parentEvent.recurrence) {
+                const instanceDate = new Date(event.recurrence.instanceDate);
+                instanceDate.setDate(instanceDate.getDate() - 1); // End before this instance
+
+                set((state) => ({
+                  events: state.events.map((e) =>
+                    e.id === parentEvent.id
+                      ? {
+                          ...e,
+                          recurrence: {
+                            ...e.recurrence!,
+                            endType: RecurrenceEndType.ON_DATE,
+                            endDate: instanceDate.toISOString(),
+                          },
+                        }
+                      : e,
+                  ),
+                }));
+              }
+            }
+          } else {
+            // Delete all instances
+            const parentId = event.recurrence?.parentEventId || id;
+            get().deleteEvent(parentId);
+          }
+        },
+
+        // Get all events including recurring instances
+        getAllEventsWithRecurring: (start, end) => {
+          const allEvents: CalendarEvent[] = [];
+          const processedParentIds = new Set<string>();
+
+          get().events.forEach((event) => {
+            if (event.recurrence && !event.recurrence.parentEventId) {
+              // This is a parent recurring event
+              processedParentIds.add(event.id);
+
+              const instances = RecurrenceEngine.generateInstances(
+                event,
+                event.recurrence,
+                new Date(start),
+                new Date(end),
+              );
+
+              const eventInstances = RecurrenceEngine.createEventInstances(
+                event,
+                instances,
+              );
+              allEvents.push(...eventInstances);
+            } else if (
+              !event.recurrence ||
+              !processedParentIds.has(event.recurrence.parentEventId || '')
+            ) {
+              // This is a regular event or a non-generated instance
+              const eventStart = new Date(event.start);
+              const eventEnd = event.end ? new Date(event.end) : eventStart;
+              const startDate = new Date(start);
+              const endDate = new Date(end);
+
+              if (
+                (eventStart >= startDate && eventStart <= endDate) ||
+                (eventEnd >= startDate && eventEnd <= endDate) ||
+                (eventStart <= startDate && eventEnd >= endDate)
+              ) {
+                allEvents.push(event);
+              }
+            }
+          });
+
+          return allEvents;
         },
       }),
       {

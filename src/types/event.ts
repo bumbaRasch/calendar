@@ -1,4 +1,5 @@
 import type { EventInput } from '@fullcalendar/core';
+import type { EventRecurrence } from './recurrence';
 
 /**
  * Event Categories with associated styling
@@ -70,13 +71,8 @@ export interface CalendarEvent extends Omit<EventInput, 'id'> {
   updatedAt: string;
   createdBy?: string;
 
-  // Recurrence (for future implementation)
-  recurrence?: {
-    frequency: 'daily' | 'weekly' | 'monthly' | 'yearly';
-    interval: number;
-    endDate?: string;
-    count?: number;
-  };
+  // Recurrence
+  recurrence?: EventRecurrence;
 
   // Notifications (for future implementation)
   reminders?: {
@@ -101,6 +97,7 @@ export interface EventFormData {
   location?: string;
   attendees?: string[];
   url?: string;
+  recurrence?: EventRecurrence;
 }
 
 /**

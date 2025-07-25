@@ -30,6 +30,7 @@ import {
   PRIORITY_CONFIG,
   type EventFormData,
 } from '../../types/event';
+import { RecurrenceConfig } from './RecurrenceConfig';
 
 interface EventDialogProps {
   isOpen: boolean;
@@ -449,6 +450,15 @@ export const EventDialog: React.FC<EventDialogProps> = ({
                 </div>
               )}
             </div>
+
+            {/* Recurrence Configuration */}
+            <RecurrenceConfig
+              value={formData.recurrence}
+              onChange={(pattern) =>
+                setFormData((prev) => ({ ...prev, recurrence: pattern }))
+              }
+              eventStart={new Date(formData.start)}
+            />
           </div>
 
           <DialogFooter>
