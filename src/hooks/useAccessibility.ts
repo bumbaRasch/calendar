@@ -28,7 +28,7 @@ export const useFocusTrap = (isActive: boolean = false) => {
 
     // Set up focus trap
     const cleanup = FocusManager.trapFocus(containerRef.current);
-    cleanupRef.current = cleanup;
+    cleanupRef.current = cleanup || null;
 
     // Focus first focusable element
     const focusableElements = FocusManager.getFocusableElements(

@@ -29,6 +29,13 @@ interface EventState {
 
   // Event filtering and searching
   searchEvents: (query: string) => CalendarEvent[];
+  searchEventsAdvanced: (
+    query: string,
+    filters?: {
+      categories?: EventCategory[];
+      dateRange?: { start: string | null; end: string | null };
+    },
+  ) => CalendarEvent[];
   getEventsInRange: (start: string, end: string) => CalendarEvent[];
 
   // Recurring event operations
@@ -176,6 +183,50 @@ export const useEventStore = create<EventState>()(
               event.title.toLowerCase().includes(lowercaseQuery) ||
               event.description?.toLowerCase().includes(lowercaseQuery),
           );
+        },
+
+        // Advanced search with filters
+        searchEventsAdvanced: (query, filters) => {
+          const lowercaseQuery = query.toLowerCase();
+          const { categories = [], dateRange } = filters || {};
+
+          return get().events.filter((event) => {
+            // Search in multiple fields
+            const matchesQuery =
+              !query ||
+              event.title.toLowerCase().includes(lowercaseQuery) ||
+              event.description?.toLowerCase().includes(lowercaseQuery) ||
+              event.location?.toLowerCase().includes(lowercaseQuery) ||
+              event.attendees?.some((attendee) =>
+                attendee.toLowerCase().includes(lowercaseQuery),
+              );
+
+            if (!matchesQuery) return false;
+
+            // Category filter
+            if (categories.length > 0 && !categories.includes(event.category)) {
+              return false;
+            }
+
+            // Date range filter
+            if (dateRange?.start || dateRange?.end) {
+              const eventStart = new Date(event.start);
+              const eventEnd = event.end ? new Date(event.end) : eventStart;
+
+              if (dateRange.start) {
+                const filterStart = new Date(dateRange.start);
+                if (eventEnd < filterStart) return false;
+              }
+
+              if (dateRange.end) {
+                const filterEnd = new Date(dateRange.end);
+                filterEnd.setHours(23, 59, 59, 999); // Include entire end date
+                if (eventStart > filterEnd) return false;
+              }
+            }
+
+            return true;
+          });
         },
 
         // Get events in date range

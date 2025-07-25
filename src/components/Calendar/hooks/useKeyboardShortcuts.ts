@@ -8,6 +8,8 @@ interface UseKeyboardShortcutsProps {
   isEnabled?: boolean;
   onDeleteEvent?: (eventId: string) => void;
   selectedEventId?: string | null;
+  onFocusSearch?: () => void;
+  onClearSearch?: () => void;
 }
 
 export const useKeyboardShortcuts = ({
@@ -16,6 +18,8 @@ export const useKeyboardShortcuts = ({
   isEnabled = true,
   onDeleteEvent,
   selectedEventId,
+  onFocusSearch,
+  onClearSearch,
 }: UseKeyboardShortcutsProps) => {
   const handleKeyPress = useCallback(
     (event: KeyboardEvent) => {
@@ -56,7 +60,10 @@ export const useKeyboardShortcuts = ({
             break;
           case 'escape':
             event.preventDefault();
-            // Close any open dialogs or tooltips
+            // Clear search or close any open dialogs or tooltips
+            if (onClearSearch) {
+              onClearSearch();
+            }
             document.dispatchEvent(new CustomEvent('calendar:escape'));
             break;
           case 'delete':
@@ -105,12 +112,22 @@ export const useKeyboardShortcuts = ({
             break;
           case 'f':
             event.preventDefault();
-            // Open search (future feature)
+            // Focus search
+            if (onFocusSearch) {
+              onFocusSearch();
+            }
             break;
         }
       }
     },
-    [calendarApi, onViewChange, onDeleteEvent, selectedEventId],
+    [
+      calendarApi,
+      onViewChange,
+      onDeleteEvent,
+      selectedEventId,
+      onFocusSearch,
+      onClearSearch,
+    ],
   );
 
   useEffect(() => {
@@ -138,7 +155,8 @@ export const useKeyboardShortcuts = ({
       ],
       advanced: [
         { keys: ['Ctrl+K', 'Cmd+K'], description: 'Command palette (future)' },
-        { keys: ['Ctrl+F', 'Cmd+F'], description: 'Search (future)' },
+        { keys: ['Ctrl+F', 'Cmd+F'], description: 'Focus search' },
+        { keys: ['Esc'], description: 'Clear search' },
       ],
     },
   };

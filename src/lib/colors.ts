@@ -222,7 +222,8 @@ export const getPriorityColor = (priority: string, isDark = false) => {
 // Helper function to get semantic color
 export const getSemanticColor = (colorPath: string, isDark = false) => {
   const keys = colorPath.split('.');
-  let color: Record<string, unknown> = colors.semantic;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let color: any = colors.semantic;
 
   for (const key of keys) {
     color = color[key];

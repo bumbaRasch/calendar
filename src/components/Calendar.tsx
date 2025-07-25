@@ -13,7 +13,11 @@ import type {
   ViewApi,
 } from '@fullcalendar/core';
 
-import type { CalendarEvent, EventFormData } from '../types/event';
+import type {
+  CalendarEvent,
+  EventFormData,
+  EventCategory,
+} from '../types/event';
 import { eventUtils } from '../types/event';
 import { useUIStore } from '../stores/useUIStore';
 import { useEventStore } from '../stores/useEventStore';
@@ -21,6 +25,7 @@ import { CalendarToolbar } from './Calendar/CalendarToolbar';
 import { CustomEventContent } from './Calendar/CustomEventContent';
 import { EventTooltip } from './Calendar/EventTooltip';
 import { EventDialog } from './Calendar/EventDialog';
+import { SearchResults } from './SearchResults';
 import {
   RecurringEventDialog,
   type RecurringEventAction,
@@ -82,6 +87,7 @@ const Calendar: React.FC<CalendarProps> = ({
     getAllEventsWithRecurring,
     updateRecurringEvent,
     deleteRecurringEvent,
+    searchEventsAdvanced,
   } = useEventStore();
 
   // Custom hooks
@@ -94,6 +100,14 @@ const Calendar: React.FC<CalendarProps> = ({
     handleEventMouseLeave,
   } = useEventTooltip(500);
   const { toasts, removeToast, success } = useToast();
+
+  // Search state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<CalendarEvent[]>([]);
+  const [highlightedEventIds, setHighlightedEventIds] = useState<Set<string>>(
+    new Set(),
+  );
+  const [showSearchResults, setShowSearchResults] = useState(false);
 
   // Events are now reactive through calendarEvents useMemo
 
@@ -161,11 +175,21 @@ const Calendar: React.FC<CalendarProps> = ({
       endDate.toISOString(),
     );
 
-    const fullCalendarEvents = allEvents.map(eventUtils.toFullCalendarEvent);
+    const fullCalendarEvents = allEvents.map((event) => {
+      const fcEvent = eventUtils.toFullCalendarEvent(event);
+      // Add search highlighting class if this event is in search results
+      if (highlightedEventIds.has(event.id)) {
+        fcEvent.classNames = [
+          ...(fcEvent.classNames || []),
+          'fc-event-search-highlighted',
+        ];
+      }
+      return fcEvent;
+    });
 
     return fullCalendarEvents;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [propEvents, events, getAllEventsWithRecurring]);
+  }, [propEvents, events, getAllEventsWithRecurring, highlightedEventIds]);
 
   // Handle recurring event actions
   const handleRecurringEventAction = useCallback(
@@ -344,6 +368,79 @@ const Calendar: React.FC<CalendarProps> = ({
     });
   }, [quickEditPopover, setSelectedEventId, setEventDialogOpen]);
 
+  // Handle search functionality
+  const handleSearch = useCallback(
+    (
+      query: string,
+      filters?: {
+        categories?: EventCategory[];
+        dateRange?: { start: string | null; end: string | null };
+      },
+    ) => {
+      setSearchQuery(query);
+
+      if (
+        !query &&
+        !filters?.categories?.length &&
+        !filters?.dateRange?.start
+      ) {
+        setSearchResults([]);
+        setHighlightedEventIds(new Set());
+        setShowSearchResults(false);
+        return;
+      }
+
+      const results = searchEventsAdvanced(query, filters);
+      setSearchResults(results);
+      setHighlightedEventIds(new Set(results.map((event) => event.id)));
+      setShowSearchResults(results.length > 0);
+    },
+    [searchEventsAdvanced],
+  );
+
+  // Handle search result click
+  const handleSearchResultClick = useCallback(
+    (event: CalendarEvent) => {
+      const calendarApi = calendarRef.current?.getApi();
+      if (calendarApi) {
+        // Navigate to the event's date
+        const eventDate = new Date(event.start);
+        calendarApi.gotoDate(eventDate);
+
+        // Highlight the event
+        setHighlightedEventIds(new Set([event.id]));
+
+        // Open event dialog after a short delay to ensure calendar renders
+        setTimeout(() => {
+          setSelectedEventId(event.id);
+          setEventDialogOpen(true);
+        }, 300);
+      }
+
+      setShowSearchResults(false);
+    },
+    [setSelectedEventId, setEventDialogOpen],
+  );
+
+  // Handle search focus
+  const handleSearchFocus = useCallback(() => {
+    // Focus the search input in the toolbar
+    const searchInput = document.querySelector(
+      '.search-bar input[type="text"]',
+    ) as HTMLInputElement;
+    if (searchInput) {
+      searchInput.focus();
+    }
+  }, []);
+
+  // Handle search clear
+  const handleSearchClear = useCallback(() => {
+    setSearchQuery('');
+    setSearchResults([]);
+    setHighlightedEventIds(new Set());
+    setShowSearchResults(false);
+  }, []);
+
   // Get calendar API for programmatic control
   const getCalendarApi = useCallback(
     (): CalendarApi | null => calendarRef.current?.getApi() || null,
@@ -367,6 +464,8 @@ const Calendar: React.FC<CalendarProps> = ({
     isEnabled: true,
     onDeleteEvent: handleDeleteEvent,
     selectedEventId,
+    onFocusSearch: handleSearchFocus,
+    onClearSearch: handleSearchClear,
   });
 
   const handleDateSelect = useCallback(
@@ -621,21 +720,39 @@ const Calendar: React.FC<CalendarProps> = ({
           onViewChange={handleViewChange}
           isMobile={isMobile}
           enableAnimations={enableAnimations}
+          onSearch={handleSearch}
         />
 
         {/* FullCalendar Component with Enhanced Styling */}
         <div
           className={cn(
-            'calendar-wrapper p-4',
+            'calendar-wrapper p-4 relative',
             '[&_.fc]:font-sans',
             '[&_.fc-toolbar]:hidden', // Hide default toolbar since we use custom
             '[&_.fc-view-harness]:rounded-lg',
             enableAnimations &&
               '[&_.fc-event]:transition-all [&_.fc-event]:duration-200',
+            // Search highlighting styles
+            '[&_.fc-event-search-highlighted]:ring-2 [&_.fc-event-search-highlighted]:ring-blue-500',
+            '[&_.fc-event-search-highlighted]:ring-opacity-75 [&_.fc-event-search-highlighted]:animate-pulse',
+            '[&_.fc-event-search-highlighted]:shadow-lg [&_.fc-event-search-highlighted]:z-10',
             themeClasses.content,
           )}
         >
           <FullCalendar ref={calendarRef} {...calendarConfig} />
+
+          {/* Search Results Overlay */}
+          {showSearchResults && (
+            <div className="absolute top-4 right-4 w-80 z-50">
+              <SearchResults
+                results={searchResults}
+                query={searchQuery}
+                onEventClick={handleSearchResultClick}
+                className="shadow-xl"
+                maxHeight="400px"
+              />
+            </div>
+          )}
         </div>
 
         {/* Event Tooltip */}

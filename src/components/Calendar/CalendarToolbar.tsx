@@ -5,6 +5,7 @@ import type { CalendarApi } from '@fullcalendar/core';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { ThemeToggle } from '../ThemeToggle';
+import { SearchBar, type SearchFilters } from '../SearchBar';
 import { useThemeContext } from '../ThemeProvider';
 import { cn } from '../../lib/utils';
 
@@ -20,6 +21,7 @@ interface CalendarToolbarProps {
   onViewChange: (view: CalendarView) => void;
   isMobile: boolean;
   enableAnimations?: boolean;
+  onSearch?: (query: string, filters?: SearchFilters) => void;
 }
 
 const viewButtons = [
@@ -35,6 +37,7 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
   onViewChange,
   isMobile,
   enableAnimations = true,
+  onSearch,
 }) => {
   const { theme } = useThemeContext();
   const api = calendarApi();
@@ -84,11 +87,6 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
             style={{
               borderColor: theme.colors.border.default,
               color: theme.colors.text.primary,
-              ':hover': {
-                backgroundColor: theme.colors.primary.bg,
-                borderColor: theme.colors.primary.main,
-                color: theme.colors.primary.main,
-              },
             }}
             aria-label="Previous period"
           >
@@ -106,11 +104,6 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
             style={{
               borderColor: theme.colors.border.default,
               color: theme.colors.text.primary,
-              ':hover': {
-                backgroundColor: theme.colors.primary.bg,
-                borderColor: theme.colors.primary.main,
-                color: theme.colors.primary.main,
-              },
             }}
             aria-label="Next period"
           >
@@ -128,11 +121,6 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
             style={{
               borderColor: theme.colors.border.default,
               color: theme.colors.text.primary,
-              ':hover': {
-                backgroundColor: theme.colors.primary.bg,
-                borderColor: theme.colors.primary.main,
-                color: theme.colors.primary.main,
-              },
             }}
           >
             Today
@@ -170,6 +158,19 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
           )}
         </div>
       </div>
+
+      {/* Search Bar - Mobile: Full width, Desktop: Inline */}
+      {isMobile ? (
+        <div className="w-full mt-3">
+          {onSearch && (
+            <SearchBar onSearch={onSearch} className="w-full search-bar" />
+          )}
+        </div>
+      ) : (
+        onSearch && (
+          <SearchBar onSearch={onSearch} className="w-64 search-bar" />
+        )
+      )}
 
       {/* Right Section - View Switcher & Theme Toggle */}
       <div className="flex items-center gap-3">
@@ -209,16 +210,6 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
                     ? theme.colors.primary.text
                     : theme.colors.text.primary,
                 borderRadius: theme.borderRadius.md,
-                ':hover':
-                  actualCurrentView !== button.key
-                    ? {
-                        backgroundColor: theme.colors.primary.bg,
-                        color: theme.colors.primary.main,
-                      }
-                    : {},
-                ':focus': {
-                  ringColor: theme.colors.border.focus,
-                },
               }}
               aria-label={`Switch to ${button.label} view`}
               aria-pressed={actualCurrentView === button.key}
