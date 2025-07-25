@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import Calendar from '../components/Calendar';
+import { CalendarErrorBoundary } from '../components/ErrorBoundaries';
 import type { CalendarEvent } from '../types/event';
 import { EventCategory, EventPriority, EventStatus } from '../types/event';
 
@@ -177,7 +178,9 @@ function App() {
       </div>
 
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <Calendar events={sampleEvents} />
+        <CalendarErrorBoundary>
+          <Calendar events={sampleEvents} />
+        </CalendarErrorBoundary>
       </div>
     </div>
   );

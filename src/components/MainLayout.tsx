@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import Header from './Header';
 import Footer from './Footer';
+import { ErrorStatus } from './ErrorStatus';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -14,6 +15,9 @@ export default function MainLayout({ children }: MainLayoutProps) {
       <main className="flex-1">{children}</main>
 
       <Footer />
+
+      {/* Error status overlay - shows critical errors */}
+      <ErrorStatus />
     </div>
   );
 }

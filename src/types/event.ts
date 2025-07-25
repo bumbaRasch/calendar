@@ -89,6 +89,7 @@ export interface CalendarEvent extends Omit<EventInput, 'id'> {
  * Event form data interface
  */
 export interface EventFormData {
+  id?: string;
   title: string;
   start: string;
   end?: string;
