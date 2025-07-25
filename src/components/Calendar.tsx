@@ -34,7 +34,6 @@ import { useKeyboardShortcuts } from './Calendar/hooks/useKeyboardShortcuts';
 import { useBreakpoint } from '../hooks/useBreakpoint';
 import { cn } from '../lib/utils';
 import { TooltipProvider } from './ui/tooltip';
-import DevTools from './DevTools';
 
 interface CalendarProps {
   events?: CalendarEvent[];
@@ -73,6 +72,7 @@ const Calendar: React.FC<CalendarProps> = ({
     isDarkMode,
   } = useUIStore();
   const {
+    events,
     addEvent,
     updateEvent,
     deleteEvent,
@@ -91,6 +91,8 @@ const Calendar: React.FC<CalendarProps> = ({
     handleEventMouseEnter,
     handleEventMouseLeave,
   } = useEventTooltip(500);
+
+  // Events are now reactive through calendarEvents useMemo
 
   // Recurring event dialog state
   const [recurringEventDialog, setRecurringEventDialog] = useState<{
@@ -140,24 +142,39 @@ const Calendar: React.FC<CalendarProps> = ({
     position: { x: 0, y: 0 },
   });
 
-  // Create event fetcher function for FullCalendar
-  const getEventsForRange = useCallback(
-    (fetchInfo: { start: Date; end: Date }) => {
-      if (propEvents) {
-        // If prop events are provided, use them directly
-        return propEvents.map(eventUtils.toFullCalendarEvent);
-      }
+  // Compute events array directly for better reactivity
+  const calendarEvents = useMemo(() => {
+    console.log(
+      'Calendar: Computing events array, store events:',
+      events.length,
+    );
 
-      // Otherwise, get events from store including recurring instances
-      const allEvents = getAllEventsWithRecurring(
-        fetchInfo.start.toISOString(),
-        fetchInfo.end.toISOString(),
-      );
+    if (propEvents) {
+      console.log('Calendar: Using prop events:', propEvents.length);
+      return propEvents.map(eventUtils.toFullCalendarEvent);
+    }
 
-      return allEvents.map(eventUtils.toFullCalendarEvent);
-    },
-    [propEvents, getAllEventsWithRecurring],
-  );
+    // Get events for a wide date range (6 months before and after current date)
+    const now = new Date();
+    const startDate = new Date(now.getFullYear(), now.getMonth() - 6, 1);
+    const endDate = new Date(now.getFullYear(), now.getMonth() + 6, 31);
+
+    console.log('Calendar: Fetching events for range:', {
+      start: startDate.toISOString(),
+      end: endDate.toISOString(),
+    });
+
+    const allEvents = getAllEventsWithRecurring(
+      startDate.toISOString(),
+      endDate.toISOString(),
+    );
+
+    console.log('Calendar: Found events in range:', allEvents.length);
+    const fullCalendarEvents = allEvents.map(eventUtils.toFullCalendarEvent);
+    console.log('Calendar: Transformed events:', fullCalendarEvents);
+
+    return fullCalendarEvents;
+  }, [propEvents, events, getAllEventsWithRecurring]);
 
   // Handle recurring event actions
   const handleRecurringEventAction = useCallback(
@@ -474,7 +491,7 @@ const Calendar: React.FC<CalendarProps> = ({
       selectMirror: true,
       dayMaxEvents: isMobile ? 2 : 4,
       weekends: true,
-      events: getEventsForRange,
+      events: calendarEvents,
       select: handleDateSelect,
       eventClick: handleEventClick,
       eventContent: renderEventContent,
@@ -552,7 +569,7 @@ const Calendar: React.FC<CalendarProps> = ({
     [
       calendarView,
       isMobile,
-      getEventsForRange,
+      calendarEvents,
       handleDateSelect,
       handleEventClick,
       renderEventContent,
@@ -776,9 +793,6 @@ const Calendar: React.FC<CalendarProps> = ({
             onOpenFullEdit={handleQuickEditOpenFull}
           />
         )}
-
-        {/* Dev Tools */}
-        <DevTools />
       </div>
     </TooltipProvider>
   );

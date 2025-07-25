@@ -104,6 +104,8 @@ export const useEventStore = create<EventState>()(
 
         // Initialize with seed events (useful for development)
         initializeSeedEvents: () => {
+          console.log('Store: initializeSeedEvents called');
+          console.log('Store: Current events before:', get().events.length);
           const seedEvents: CalendarEvent[] = [
             {
               id: 'seed-1',
@@ -154,7 +156,10 @@ export const useEventStore = create<EventState>()(
               },
             },
           ];
+
+          console.log('Store: Setting seed events:', seedEvents.length);
           set({ events: seedEvents });
+          console.log('Store: Events after set:', get().events.length);
         },
 
         // Search events by title or description
@@ -386,3 +391,13 @@ export const useEventStore = create<EventState>()(
     },
   ),
 );
+
+// Global debug functions (only in development)
+if (typeof window !== 'undefined') {
+  (window as any).debugEventStore = {
+    addSeedEvents: () => useEventStore.getState().initializeSeedEvents(),
+    clearEvents: () => useEventStore.getState().clearEvents(),
+    getEvents: () => useEventStore.getState().events,
+    logEvents: () => console.log('Events:', useEventStore.getState().events),
+  };
+}
