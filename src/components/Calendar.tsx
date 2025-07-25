@@ -25,6 +25,8 @@ import {
   type RecurringEventAction,
   type RecurringEventScope,
 } from './Calendar/RecurringEventDialog';
+import { DeleteEventDialog } from './Calendar/DeleteEventDialog';
+import { BulkDeleteDialog } from './Calendar/BulkDeleteDialog';
 import { useCalendarTheme } from './Calendar/hooks/useCalendarTheme';
 import { useEventTooltip } from './Calendar/hooks/useEventTooltip';
 import { useKeyboardShortcuts } from './Calendar/hooks/useKeyboardShortcuts';
@@ -71,6 +73,7 @@ const Calendar: React.FC<CalendarProps> = ({
   const {
     addEvent,
     updateEvent,
+    deleteEvent,
     getEventById,
     getAllEventsWithRecurring,
     updateRecurringEvent,
@@ -101,6 +104,27 @@ const Calendar: React.FC<CalendarProps> = ({
     eventId: '',
     eventTitle: '',
     isRecurringInstance: false,
+  });
+
+  // Delete confirmation dialog states
+  const [deleteEventDialog, setDeleteEventDialog] = useState<{
+    isOpen: boolean;
+    eventToDelete: CalendarEvent | null;
+    isLoading: boolean;
+  }>({
+    isOpen: false,
+    eventToDelete: null,
+    isLoading: false,
+  });
+
+  const [bulkDeleteDialog, setBulkDeleteDialog] = useState<{
+    isOpen: boolean;
+    eventsToDelete: CalendarEvent[];
+    isLoading: boolean;
+  }>({
+    isOpen: false,
+    eventsToDelete: [],
+    isLoading: false,
   });
 
   // Create event fetcher function for FullCalendar
@@ -148,6 +172,87 @@ const Calendar: React.FC<CalendarProps> = ({
     ],
   );
 
+  // Handle single event deletion with confirmation
+  const handleDeleteEvent = useCallback(
+    (eventId: string) => {
+      const event = getEventById(eventId);
+      if (!event) return;
+
+      if (event.recurrence) {
+        // For recurring events, use the existing recurring event dialog
+        setRecurringEventDialog({
+          isOpen: true,
+          action: 'delete',
+          eventId: eventId,
+          eventTitle: event.title,
+          isRecurringInstance: !!event.recurrence.parentEventId,
+        });
+      } else {
+        // For regular events, show delete confirmation dialog
+        setDeleteEventDialog({
+          isOpen: true,
+          eventToDelete: event,
+          isLoading: false,
+        });
+      }
+    },
+    [getEventById],
+  );
+
+  // Confirm single event deletion
+  const confirmDeleteEvent = useCallback(async () => {
+    const { eventToDelete } = deleteEventDialog;
+    if (!eventToDelete) return;
+
+    setDeleteEventDialog((prev) => ({ ...prev, isLoading: true }));
+
+    try {
+      deleteEvent(eventToDelete.id);
+
+      // Close dialog and reset state
+      setDeleteEventDialog({
+        isOpen: false,
+        eventToDelete: null,
+        isLoading: false,
+      });
+    } catch (error) {
+      console.error('Failed to delete event:', error);
+      setDeleteEventDialog((prev) => ({ ...prev, isLoading: false }));
+    }
+  }, [deleteEventDialog, deleteEvent]);
+
+  // Confirm bulk event deletion
+  const confirmBulkDelete = useCallback(
+    async (eventIds: string[]) => {
+      setBulkDeleteDialog((prev) => ({ ...prev, isLoading: true }));
+
+      try {
+        // Delete each event
+        eventIds.forEach((eventId) => {
+          const event = getEventById(eventId);
+          if (event?.recurrence) {
+            // For recurring events, delete the entire series
+            const parentId = event.recurrence.parentEventId || eventId;
+            deleteEvent(parentId);
+          } else {
+            deleteEvent(eventId);
+          }
+        });
+
+        // Close dialog and reset state
+        setBulkDeleteDialog({
+          isOpen: false,
+          eventsToDelete: [],
+          isLoading: false,
+        });
+      } catch (error) {
+        console.error('Failed to delete events:', error);
+        setBulkDeleteDialog((prev) => ({ ...prev, isLoading: false }));
+      }
+    },
+    [getEventById, deleteEvent],
+  );
+
   // Get calendar API for programmatic control
   const getCalendarApi = useCallback(
     (): CalendarApi | null => calendarRef.current?.getApi() || null,
@@ -169,6 +274,8 @@ const Calendar: React.FC<CalendarProps> = ({
     onViewChange: (view: string) => handleViewChange(view as CalendarView),
     currentView: calendarView,
     isEnabled: true,
+    onDeleteEvent: handleDeleteEvent,
+    selectedEventId,
   });
 
   const handleDateSelect = useCallback(
@@ -457,6 +564,11 @@ const Calendar: React.FC<CalendarProps> = ({
             setSelectedDateInfo(null);
             setSelectedEventId(null);
           }}
+          onDelete={
+            selectedEventId
+              ? () => handleDeleteEvent(selectedEventId)
+              : undefined
+          }
           initialData={
             selectedEventId
               ? (() => {
@@ -501,6 +613,36 @@ const Calendar: React.FC<CalendarProps> = ({
           action={recurringEventDialog.action}
           eventTitle={recurringEventDialog.eventTitle}
           isRecurringInstance={recurringEventDialog.isRecurringInstance}
+        />
+
+        {/* Delete Event Confirmation Dialog */}
+        <DeleteEventDialog
+          isOpen={deleteEventDialog.isOpen}
+          onClose={() =>
+            setDeleteEventDialog({
+              isOpen: false,
+              eventToDelete: null,
+              isLoading: false,
+            })
+          }
+          onConfirm={confirmDeleteEvent}
+          event={deleteEventDialog.eventToDelete}
+          isLoading={deleteEventDialog.isLoading}
+        />
+
+        {/* Bulk Delete Dialog */}
+        <BulkDeleteDialog
+          isOpen={bulkDeleteDialog.isOpen}
+          onClose={() =>
+            setBulkDeleteDialog({
+              isOpen: false,
+              eventsToDelete: [],
+              isLoading: false,
+            })
+          }
+          onConfirm={confirmBulkDelete}
+          events={bulkDeleteDialog.eventsToDelete}
+          isLoading={bulkDeleteDialog.isLoading}
         />
       </div>
     </TooltipProvider>

@@ -6,12 +6,16 @@ interface UseKeyboardShortcutsProps {
   onViewChange: (view: string) => void;
   currentView: string;
   isEnabled?: boolean;
+  onDeleteEvent?: (eventId: string) => void;
+  selectedEventId?: string | null;
 }
 
 export const useKeyboardShortcuts = ({
   calendarApi,
   onViewChange,
   isEnabled = true,
+  onDeleteEvent,
+  selectedEventId,
 }: UseKeyboardShortcutsProps) => {
   const handleKeyPress = useCallback(
     (event: KeyboardEvent) => {
@@ -54,6 +58,14 @@ export const useKeyboardShortcuts = ({
             event.preventDefault();
             // Close any open dialogs or tooltips
             document.dispatchEvent(new CustomEvent('calendar:escape'));
+            break;
+          case 'delete':
+          case 'backspace':
+            // Delete selected event
+            if (selectedEventId && onDeleteEvent) {
+              event.preventDefault();
+              onDeleteEvent(selectedEventId);
+            }
             break;
         }
       }
@@ -98,7 +110,7 @@ export const useKeyboardShortcuts = ({
         }
       }
     },
-    [calendarApi, onViewChange],
+    [calendarApi, onViewChange, onDeleteEvent, selectedEventId],
   );
 
   useEffect(() => {
@@ -116,6 +128,7 @@ export const useKeyboardShortcuts = ({
         { keys: ['→', 'L'], description: 'Next period' },
         { keys: ['T'], description: 'Go to today' },
         { keys: ['Esc'], description: 'Close dialogs' },
+        { keys: ['Del', 'Backspace'], description: 'Delete selected event' },
       ],
       views: [
         { keys: ['Alt+1', 'Alt+M'], description: 'Month view' },

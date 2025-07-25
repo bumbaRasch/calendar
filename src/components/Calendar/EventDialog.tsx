@@ -5,6 +5,7 @@ import {
   UsersIcon,
   LinkIcon,
   AlertCircleIcon,
+  Trash2,
 } from 'lucide-react';
 import type { DateSelectArg } from '@fullcalendar/core';
 
@@ -36,6 +37,7 @@ interface EventDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (eventData: EventFormData) => void;
+  onDelete?: () => void;
   initialData?: Partial<EventFormData>;
   selectedDateInfo?: DateSelectArg | null;
 }
@@ -48,6 +50,7 @@ export const EventDialog: React.FC<EventDialogProps> = ({
   isOpen,
   onClose,
   onSave,
+  onDelete,
   initialData,
   selectedDateInfo,
 }) => {
@@ -461,10 +464,22 @@ export const EventDialog: React.FC<EventDialogProps> = ({
             />
           </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
+          <DialogFooter className="flex gap-2">
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={onClose}>
+                Cancel
+              </Button>
+              {initialData && onDelete && (
+                <Button
+                  variant="destructive"
+                  onClick={onDelete}
+                  className="flex items-center gap-2"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Delete
+                </Button>
+              )}
+            </div>
             <Button
               onClick={handleSave}
               className="bg-primary-600 hover:bg-primary-700"
