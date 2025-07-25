@@ -40,10 +40,13 @@ import { useKeyboardShortcuts } from './Calendar/hooks/useKeyboardShortcuts';
 import { KeyboardShortcutsDialog } from './Calendar/KeyboardShortcutsDialog';
 import { KeyboardShortcutsOverlay } from './Calendar/KeyboardShortcutsOverlay';
 import { useKeyboardShortcutsOverlay } from './Calendar/hooks/useKeyboardShortcutsOverlay';
+import { PrintDialog, type PrintOptions } from './Calendar/PrintDialog';
+import { CalendarPrinter } from '../utils/printCalendar';
 import { useBreakpoint } from '../hooks/useBreakpoint';
 import { cn } from '../lib/utils';
 import { TooltipProvider } from './ui/tooltip';
 import { ToastContainer, useToast } from './ui/toast';
+import '../styles/calendar-print.css';
 
 interface CalendarProps {
   events?: CalendarEvent[];
@@ -114,6 +117,9 @@ const Calendar: React.FC<CalendarProps> = ({
 
   // Keyboard shortcuts dialog state
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
+
+  // Print dialog state
+  const [showPrintDialog, setShowPrintDialog] = useState(false);
 
   // Keyboard shortcuts overlay
   const {
@@ -503,6 +509,59 @@ const Calendar: React.FC<CalendarProps> = ({
     [],
   );
 
+  // Handle print dialog
+  const handlePrint = useCallback(() => {
+    setShowPrintDialog(true);
+  }, []);
+
+  const handlePrintCancel = useCallback(() => {
+    setShowPrintDialog(false);
+  }, []);
+
+  const handlePrintExecute = useCallback(
+    async (options: PrintOptions) => {
+      const api = getCalendarApi();
+      if (!api) {
+        success('Print Error', 'Calendar not ready for printing');
+        return;
+      }
+
+      try {
+        const currentView = api.view.type;
+        const title = api.view.title;
+
+        // Create date range based on current view
+        const dateRange = {
+          start: new Date(api.view.currentStart),
+          end: new Date(api.view.currentEnd),
+          title: title,
+        };
+
+        if ('preview' in options && (options as any).preview) {
+          await CalendarPrinter.previewCalendar({
+            calendarApi: api,
+            options,
+            dateRange,
+            currentView,
+          });
+          success('Print Preview', 'Print preview opened in new window');
+        } else {
+          await CalendarPrinter.printCalendar({
+            calendarApi: api,
+            options,
+            dateRange,
+            currentView,
+          });
+          success('Print Started', 'Calendar sent to printer');
+        }
+      } catch (error) {
+        console.error('Print error:', error);
+        success('Print Error', 'Failed to print calendar. Please try again.');
+      }
+    },
+    [getCalendarApi, success],
+  );
+
   // Save view preference to localStorage when changed
   const handleViewChange = useCallback(
     (view: CalendarView) => {
@@ -787,6 +846,7 @@ const Calendar: React.FC<CalendarProps> = ({
           isMobile={isMobile}
           enableAnimations={enableAnimations}
           onSearch={handleSearch}
+          onPrint={handlePrint}
         />
 
         {/* FullCalendar Component with Enhanced Styling */}
@@ -1005,6 +1065,19 @@ const Calendar: React.FC<CalendarProps> = ({
         <KeyboardShortcutsDialog
           isOpen={showKeyboardShortcuts}
           onClose={() => setShowKeyboardShortcuts(false)}
+        />
+
+        {/* Print Dialog */}
+        <PrintDialog
+          isOpen={showPrintDialog}
+          onClose={handlePrintCancel}
+          onPrint={handlePrintExecute}
+          currentView={calendarView}
+          dateRange={{
+            start: new Date(getCalendarApi()?.view.currentStart || new Date()),
+            end: new Date(getCalendarApi()?.view.currentEnd || new Date()),
+            title: getCalendarApi()?.view.title || 'Calendar',
+          }}
         />
 
         {/* Keyboard Shortcuts Overlay */}

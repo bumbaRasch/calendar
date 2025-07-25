@@ -1,5 +1,10 @@
 import React from 'react';
-import { ChevronLeftIcon, ChevronRightIcon, CalendarIcon } from 'lucide-react';
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  CalendarIcon,
+  Printer,
+} from 'lucide-react';
 import type { CalendarApi } from '@fullcalendar/core';
 
 import { Button } from '../ui/button';
@@ -22,6 +27,7 @@ interface CalendarToolbarProps {
   isMobile: boolean;
   enableAnimations?: boolean;
   onSearch?: (query: string, filters?: SearchFilters) => void;
+  onPrint?: () => void;
 }
 
 const viewButtons = [
@@ -38,6 +44,7 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
   isMobile,
   enableAnimations = true,
   onSearch,
+  onPrint,
 }) => {
   const { theme } = useThemeContext();
   const api = calendarApi();
@@ -232,6 +239,27 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
             </button>
           ))}
         </div>
+
+        {/* Print Button */}
+        {onPrint && (
+          <Button
+            variant="outline"
+            size={isMobile ? 'sm' : 'default'}
+            onClick={onPrint}
+            className={cn(
+              'flex items-center gap-2',
+              enableAnimations && 'transition-all duration-200 hover:scale-105',
+            )}
+            style={{
+              borderColor: theme.colors.border.default,
+              color: theme.colors.text.primary,
+            }}
+            aria-label="Print calendar"
+          >
+            <Printer className="h-4 w-4" />
+            {!isMobile && <span>Print</span>}
+          </Button>
+        )}
 
         {/* Theme Toggle */}
         <ThemeToggle
