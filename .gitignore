@@ -70,3 +70,4 @@ count.txt
 
 # Documentation (if not needed in repo)
 docs/
+.claude/
