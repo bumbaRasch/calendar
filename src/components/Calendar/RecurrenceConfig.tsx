@@ -17,6 +17,7 @@ import {
   type RecurrencePattern,
 } from '../../types/recurrence';
 import { RecurrenceEngine } from '../../utils/recurrenceEngine';
+import { RecurrencePreview } from './RecurrencePreview';
 import { cn } from '../../lib/utils';
 
 interface RecurrenceConfigProps {
@@ -263,6 +264,15 @@ export const RecurrenceConfig: React.FC<RecurrenceConfigProps> = ({
                 <span>{getRecurrenceDescription()}</span>
               </div>
             </div>
+          )}
+
+          {/* Recurrence Preview */}
+          {validation.length === 0 && (
+            <RecurrencePreview
+              pattern={pattern}
+              eventStart={eventStart}
+              eventTitle="Sample Event"
+            />
           )}
 
           {/* Validation Errors */}

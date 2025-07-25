@@ -8,7 +8,7 @@ import {
   eventUtils,
 } from '../types/event';
 import { RecurrenceEngine } from '../utils/recurrenceEngine';
-import { RecurrenceEndType } from '../types/recurrence';
+import { RecurrenceEndType, RecurrenceFrequency } from '../types/recurrence';
 
 interface EventState {
   // Events data
@@ -25,6 +25,7 @@ interface EventState {
   // Bulk operations
   setEvents: (events: CalendarEvent[]) => void;
   clearEvents: () => void;
+  initializeSeedEvents: () => void;
 
   // Event filtering and searching
   searchEvents: (query: string) => CalendarEvent[];
@@ -49,7 +50,7 @@ export const useEventStore = create<EventState>()(
   devtools(
     persist(
       (set, get) => ({
-        // Initial events data
+        // Initial events data (empty, use initializeSeedEvents() to add test data)
         events: [],
 
         // Add new event
@@ -99,6 +100,61 @@ export const useEventStore = create<EventState>()(
         // Clear all events
         clearEvents: () => {
           set({ events: [] });
+        },
+
+        // Initialize with seed events (useful for development)
+        initializeSeedEvents: () => {
+          const seedEvents: CalendarEvent[] = [
+            {
+              id: 'seed-1',
+              title: 'Team Meeting - Project Review',
+              start: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Tomorrow at current time
+              end: new Date(
+                Date.now() + 24 * 60 * 60 * 1000 + 60 * 60 * 1000,
+              ).toISOString(), // +1 hour
+              allDay: false,
+              category: EventCategory.MEETING,
+              priority: EventPriority.HIGH,
+              status: EventStatus.CONFIRMED,
+              description:
+                'Weekly team meeting to review project progress, discuss blockers, and plan upcoming tasks. Please prepare your status updates.',
+              location: 'Conference Room A / Zoom',
+              attendees: [
+                'john@company.com',
+                'sarah@company.com',
+                'mike@company.com',
+              ],
+              url: 'https://zoom.us/j/123456789',
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            },
+            {
+              id: 'seed-2',
+              title: 'Daily Standup',
+              start: new Date(
+                Date.now() + 2 * 24 * 60 * 60 * 1000,
+              ).toISOString(), // Day after tomorrow
+              allDay: false,
+              category: EventCategory.MEETING,
+              priority: EventPriority.MEDIUM,
+              status: EventStatus.CONFIRMED,
+              description:
+                'Daily standup meeting to sync on progress and blockers.',
+              location: 'Zoom',
+              attendees: ['team@company.com'],
+              url: 'https://zoom.us/j/987654321',
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              recurrence: {
+                frequency: RecurrenceFrequency.DAILY,
+                interval: 1,
+                endType: RecurrenceEndType.NEVER,
+                weekDays: [],
+                exceptions: [],
+              },
+            },
+          ];
+          set({ events: seedEvents });
         },
 
         // Search events by title or description

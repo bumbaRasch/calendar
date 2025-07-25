@@ -102,24 +102,54 @@ export const EventDialog: React.FC<EventDialogProps> = ({
   const validateForm = (): boolean => {
     const newErrors: Partial<Record<keyof EventFormData, string>> = {};
 
+    // Title validation
     if (!formData.title.trim()) {
       newErrors.title = 'Event title is required';
+    } else if (formData.title.trim().length > 200) {
+      newErrors.title = 'Event title must be less than 200 characters';
     }
 
+    // Date validation
     if (!formData.start) {
       newErrors.start = 'Start date is required';
     }
 
-    if (
-      formData.end &&
-      formData.start &&
-      new Date(formData.end) <= new Date(formData.start)
-    ) {
-      newErrors.end = 'End date must be after start date';
+    if (formData.end && formData.start) {
+      const startDate = new Date(formData.start);
+      const endDate = new Date(formData.end);
+
+      if (endDate <= startDate) {
+        newErrors.end = 'End date must be after start date';
+      }
+
+      // Check for reasonable duration (max 30 days for single event)
+      const diffDays =
+        (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
+      if (diffDays > 30) {
+        newErrors.end = 'Event duration cannot exceed 30 days';
+      }
     }
 
-    if (formData.url && !isValidUrl(formData.url)) {
-      newErrors.url = 'Please enter a valid URL';
+    // URL validation
+    if (formData.url && formData.url.trim()) {
+      if (!isValidUrl(formData.url.trim())) {
+        newErrors.url = 'Please enter a valid URL (e.g., https://example.com)';
+      }
+    }
+
+    // Description validation
+    if (formData.description && formData.description.length > 1000) {
+      newErrors.description = 'Description must be less than 1000 characters';
+    }
+
+    // Location validation
+    if (formData.location && formData.location.length > 200) {
+      newErrors.location = 'Location must be less than 200 characters';
+    }
+
+    // Attendees validation
+    if (formData.attendees && formData.attendees.length > 50) {
+      newErrors.attendees = 'Maximum 50 attendees allowed';
     }
 
     setErrors(newErrors);
@@ -142,17 +172,40 @@ export const EventDialog: React.FC<EventDialogProps> = ({
     }
   };
 
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handleAddAttendee = () => {
-    if (
-      attendeeInput.trim() &&
-      !formData.attendees?.includes(attendeeInput.trim())
-    ) {
-      setFormData((prev) => ({
-        ...prev,
-        attendees: [...(prev.attendees || []), attendeeInput.trim()],
-      }));
-      setAttendeeInput('');
+    const trimmedInput = attendeeInput.trim();
+
+    if (!trimmedInput) return;
+
+    // Check if already exists
+    if (formData.attendees?.includes(trimmedInput)) {
+      return;
     }
+
+    // Validate email format
+    if (!validateEmail(trimmedInput)) {
+      setErrors((prev) => ({
+        ...prev,
+        attendees: 'Please enter a valid email address',
+      }));
+      return;
+    }
+
+    // Clear attendees error if it was set
+    if (errors.attendees) {
+      setErrors((prev) => ({ ...prev, attendees: undefined }));
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      attendees: [...(prev.attendees || []), trimmedInput],
+    }));
+    setAttendeeInput('');
   };
 
   const handleRemoveAttendee = (attendee: string) => {
@@ -162,11 +215,77 @@ export const EventDialog: React.FC<EventDialogProps> = ({
     }));
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent, action: () => void) => {
+  const handleKeyDown = (e: React.KeyboardEvent, action: () => void) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       action();
     }
+  };
+
+  // Real-time validation for specific fields
+  const validateField = (field: keyof EventFormData, value: any) => {
+    const newErrors = { ...errors };
+
+    switch (field) {
+      case 'title':
+        if (!value.trim()) {
+          newErrors.title = 'Event title is required';
+        } else if (value.trim().length > 200) {
+          newErrors.title = 'Event title must be less than 200 characters';
+        } else {
+          delete newErrors.title;
+        }
+        break;
+
+      case 'url':
+        if (value && value.trim() && !isValidUrl(value.trim())) {
+          newErrors.url =
+            'Please enter a valid URL (e.g., https://example.com)';
+        } else {
+          delete newErrors.url;
+        }
+        break;
+
+      case 'description':
+        if (value && value.length > 1000) {
+          newErrors.description =
+            'Description must be less than 1000 characters';
+        } else {
+          delete newErrors.description;
+        }
+        break;
+
+      case 'location':
+        if (value && value.length > 200) {
+          newErrors.location = 'Location must be less than 200 characters';
+        } else {
+          delete newErrors.location;
+        }
+        break;
+
+      case 'end':
+        if (value && formData.start) {
+          const startDate = new Date(formData.start);
+          const endDate = new Date(value);
+
+          if (endDate <= startDate) {
+            newErrors.end = 'End date must be after start date';
+          } else {
+            const diffDays =
+              (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
+            if (diffDays > 30) {
+              newErrors.end = 'Event duration cannot exceed 30 days';
+            } else {
+              delete newErrors.end;
+            }
+          }
+        } else {
+          delete newErrors.end;
+        }
+        break;
+    }
+
+    setErrors(newErrors);
   };
 
   return (
@@ -203,17 +322,32 @@ export const EventDialog: React.FC<EventDialogProps> = ({
           <div className="grid gap-6 py-4">
             {/* Event Title */}
             <div className="space-y-2">
-              <Label htmlFor="title" className="text-sm font-medium">
-                Event Title *
-              </Label>
+              <div className="flex justify-between items-center">
+                <Label htmlFor="title" className="text-sm font-medium">
+                  Event Title *
+                </Label>
+                <span
+                  className={cn(
+                    'text-xs',
+                    formData.title.length > 180
+                      ? 'text-red-500'
+                      : 'text-gray-500',
+                  )}
+                >
+                  {formData.title.length}/200
+                </span>
+              </div>
               <Input
                 id="title"
                 value={formData.title}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, title: e.target.value }))
-                }
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setFormData((prev) => ({ ...prev, title: value }));
+                  validateField('title', value);
+                }}
                 placeholder="Enter event title..."
                 className={cn(errors.title && 'border-red-500')}
+                maxLength={200}
               />
               {errors.title && (
                 <p className="text-sm text-red-500 flex items-center gap-1">
@@ -233,9 +367,14 @@ export const EventDialog: React.FC<EventDialogProps> = ({
                   id="start"
                   type="datetime-local"
                   value={formData.start}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, start: e.target.value }))
-                  }
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setFormData((prev) => ({ ...prev, start: value }));
+                    // Revalidate end date when start date changes
+                    if (formData.end) {
+                      validateField('end', formData.end);
+                    }
+                  }}
                   className={cn(errors.start && 'border-red-500')}
                 />
                 {errors.start && (
@@ -254,9 +393,11 @@ export const EventDialog: React.FC<EventDialogProps> = ({
                   id="end"
                   type="datetime-local"
                   value={formData.end}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, end: e.target.value }))
-                  }
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setFormData((prev) => ({ ...prev, end: value }));
+                    validateField('end', value);
+                  }}
                   className={cn(errors.end && 'border-red-500')}
                 />
                 {errors.end && (
@@ -344,41 +485,84 @@ export const EventDialog: React.FC<EventDialogProps> = ({
 
             {/* Description */}
             <div className="space-y-2">
-              <Label htmlFor="description" className="text-sm font-medium">
-                Description
-              </Label>
+              <div className="flex justify-between items-center">
+                <Label htmlFor="description" className="text-sm font-medium">
+                  Description
+                </Label>
+                <span
+                  className={cn(
+                    'text-xs',
+                    (formData.description?.length || 0) > 900
+                      ? 'text-red-500'
+                      : 'text-gray-500',
+                  )}
+                >
+                  {formData.description?.length || 0}/1000
+                </span>
+              </div>
               <textarea
                 id="description"
                 value={formData.description}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    description: e.target.value,
-                  }))
-                }
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setFormData((prev) => ({ ...prev, description: value }));
+                  validateField('description', value);
+                }}
                 placeholder="Add event description..."
                 rows={3}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
+                maxLength={1000}
+                className={cn(
+                  'w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none',
+                  errors.description && 'border-red-500',
+                )}
               />
+              {errors.description && (
+                <p className="text-sm text-red-500 flex items-center gap-1">
+                  <AlertCircleIcon className="h-4 w-4" />
+                  {errors.description}
+                </p>
+              )}
             </div>
 
             {/* Location */}
             <div className="space-y-2">
-              <Label
-                htmlFor="location"
-                className="flex items-center gap-2 text-sm font-medium"
-              >
-                <MapPinIcon className="h-4 w-4" />
-                Location
-              </Label>
+              <div className="flex justify-between items-center">
+                <Label
+                  htmlFor="location"
+                  className="flex items-center gap-2 text-sm font-medium"
+                >
+                  <MapPinIcon className="h-4 w-4" />
+                  Location
+                </Label>
+                <span
+                  className={cn(
+                    'text-xs',
+                    (formData.location?.length || 0) > 180
+                      ? 'text-red-500'
+                      : 'text-gray-500',
+                  )}
+                >
+                  {formData.location?.length || 0}/200
+                </span>
+              </div>
               <Input
                 id="location"
                 value={formData.location}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, location: e.target.value }))
-                }
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setFormData((prev) => ({ ...prev, location: value }));
+                  validateField('location', value);
+                }}
                 placeholder="Enter event location..."
+                className={cn(errors.location && 'border-red-500')}
+                maxLength={200}
               />
+              {errors.location && (
+                <p className="text-sm text-red-500 flex items-center gap-1">
+                  <AlertCircleIcon className="h-4 w-4" />
+                  {errors.location}
+                </p>
+              )}
             </div>
 
             {/* URL */}
@@ -394,9 +578,11 @@ export const EventDialog: React.FC<EventDialogProps> = ({
                 id="url"
                 type="url"
                 value={formData.url}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, url: e.target.value }))
-                }
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setFormData((prev) => ({ ...prev, url: value }));
+                  validateField('url', value);
+                }}
                 placeholder="https://..."
                 className={cn(errors.url && 'border-red-500')}
               />
@@ -419,7 +605,7 @@ export const EventDialog: React.FC<EventDialogProps> = ({
                   value={attendeeInput}
                   onChange={(e) => setAttendeeInput(e.target.value)}
                   placeholder="Enter email or name..."
-                  onKeyPress={(e) => handleKeyPress(e, handleAddAttendee)}
+                  onKeyDown={(e) => handleKeyDown(e, handleAddAttendee)}
                   className="flex-1"
                 />
                 <Button

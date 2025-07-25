@@ -27,12 +27,14 @@ import {
 } from './Calendar/RecurringEventDialog';
 import { DeleteEventDialog } from './Calendar/DeleteEventDialog';
 import { BulkDeleteDialog } from './Calendar/BulkDeleteDialog';
+import { QuickEditPopover } from './Calendar/QuickEditPopover';
 import { useCalendarTheme } from './Calendar/hooks/useCalendarTheme';
 import { useEventTooltip } from './Calendar/hooks/useEventTooltip';
 import { useKeyboardShortcuts } from './Calendar/hooks/useKeyboardShortcuts';
 import { useBreakpoint } from '../hooks/useBreakpoint';
 import { cn } from '../lib/utils';
 import { TooltipProvider } from './ui/tooltip';
+import DevTools from './DevTools';
 
 interface CalendarProps {
   events?: CalendarEvent[];
@@ -125,6 +127,17 @@ const Calendar: React.FC<CalendarProps> = ({
     isOpen: false,
     eventsToDelete: [],
     isLoading: false,
+  });
+
+  // Quick edit popover state
+  const [quickEditPopover, setQuickEditPopover] = useState<{
+    isVisible: boolean;
+    event: CalendarEvent | null;
+    position: { x: number; y: number };
+  }>({
+    isVisible: false,
+    event: null,
+    position: { x: 0, y: 0 },
   });
 
   // Create event fetcher function for FullCalendar
@@ -253,6 +266,65 @@ const Calendar: React.FC<CalendarProps> = ({
     [getEventById, deleteEvent],
   );
 
+  // Handle quick edit popover
+  const handleShowQuickEdit = useCallback(
+    (event: CalendarEvent, position: { x: number; y: number }) => {
+      setQuickEditPopover({
+        isVisible: true,
+        event,
+        position,
+      });
+    },
+    [],
+  );
+
+  const handleQuickEditSave = useCallback(
+    (eventData: Partial<EventFormData>) => {
+      const { event } = quickEditPopover;
+      if (!event) return;
+
+      if (event.recurrence) {
+        // For recurring events, show the recurring event dialog
+        setRecurringEventDialog({
+          isOpen: true,
+          action: 'edit',
+          eventId: event.id,
+          eventTitle: event.title,
+          isRecurringInstance: !!event.recurrence.parentEventId,
+          pendingData: eventData as EventFormData,
+        });
+      } else {
+        // For regular events, update directly
+        const updatedEvent: CalendarEvent = {
+          ...event,
+          ...eventData,
+          updatedAt: new Date().toISOString(),
+        };
+        updateEvent(event.id, updatedEvent);
+      }
+
+      setQuickEditPopover({
+        isVisible: false,
+        event: null,
+        position: { x: 0, y: 0 },
+      });
+    },
+    [quickEditPopover, updateEvent],
+  );
+
+  const handleQuickEditOpenFull = useCallback(() => {
+    const { event } = quickEditPopover;
+    if (!event) return;
+
+    setSelectedEventId(event.id);
+    setEventDialogOpen(true);
+    setQuickEditPopover({
+      isVisible: false,
+      event: null,
+      position: { x: 0, y: 0 },
+    });
+  }, [quickEditPopover, setSelectedEventId, setEventDialogOpen]);
+
   // Get calendar API for programmatic control
   const getCalendarApi = useCallback(
     (): CalendarApi | null => calendarRef.current?.getApi() || null,
@@ -301,14 +373,39 @@ const Calendar: React.FC<CalendarProps> = ({
         return;
       }
 
-      // Default behavior: open event dialog for editing
       const eventId = clickInfo.event.id;
-      if (eventId) {
+      if (!eventId) return;
+
+      const event = getEventById(eventId);
+      if (!event) return;
+
+      // Check if it's a right-click or ctrl+click for quick edit
+      const isQuickEdit =
+        clickInfo.jsEvent.button === 2 ||
+        clickInfo.jsEvent.ctrlKey ||
+        clickInfo.jsEvent.metaKey;
+
+      if (isQuickEdit && !isMobile) {
+        // Show quick edit popover
+        const rect = clickInfo.el.getBoundingClientRect();
+        handleShowQuickEdit(event, {
+          x: rect.right + 10,
+          y: rect.top,
+        });
+      } else {
+        // Default behavior: open full event dialog for editing
         setSelectedEventId(eventId);
         setEventDialogOpen(true);
       }
     },
-    [onEventClick, setSelectedEventId, setEventDialogOpen],
+    [
+      onEventClick,
+      getEventById,
+      isMobile,
+      handleShowQuickEdit,
+      setSelectedEventId,
+      setEventDialogOpen,
+    ],
   );
 
   // Custom event content renderer
@@ -383,6 +480,13 @@ const Calendar: React.FC<CalendarProps> = ({
       eventContent: renderEventContent,
       eventDidMount: handleEventDidMount,
       eventWillUnmount: handleEventWillUnmount,
+      eventMouseEnter: (info: any) => {
+        // Disable context menu on events to allow right-click for quick edit
+        info.el.addEventListener('contextmenu', (e: Event) => {
+          e.preventDefault();
+          handleEventClick(info);
+        });
+      },
       height: isMobile ? 'auto' : 650,
       aspectRatio: isMobile ? 1.0 : 1.35,
       expandRows: !isMobile,
@@ -644,6 +748,37 @@ const Calendar: React.FC<CalendarProps> = ({
           events={bulkDeleteDialog.eventsToDelete}
           isLoading={bulkDeleteDialog.isLoading}
         />
+
+        {/* Quick Edit Popover */}
+        {quickEditPopover.event && (
+          <QuickEditPopover
+            event={quickEditPopover.event}
+            isVisible={quickEditPopover.isVisible}
+            position={quickEditPopover.position}
+            onClose={() =>
+              setQuickEditPopover({
+                isVisible: false,
+                event: null,
+                position: { x: 0, y: 0 },
+              })
+            }
+            onSave={handleQuickEditSave}
+            onDelete={() => {
+              if (quickEditPopover.event) {
+                handleDeleteEvent(quickEditPopover.event.id);
+                setQuickEditPopover({
+                  isVisible: false,
+                  event: null,
+                  position: { x: 0, y: 0 },
+                });
+              }
+            }}
+            onOpenFullEdit={handleQuickEditOpenFull}
+          />
+        )}
+
+        {/* Dev Tools */}
+        <DevTools />
       </div>
     </TooltipProvider>
   );
