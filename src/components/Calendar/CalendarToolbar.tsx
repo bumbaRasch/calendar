@@ -9,7 +9,6 @@ import type { CalendarApi } from '@fullcalendar/core';
 
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
-import { ThemeToggle } from '../ThemeToggle';
 import { SearchBar, type SearchFilters } from '../SearchBar';
 import { useThemeContext } from '../ThemeProvider';
 import { cn } from '../../lib/utils';
@@ -260,13 +259,6 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
             {!isMobile && <span>Print</span>}
           </Button>
         )}
-
-        {/* Theme Toggle */}
-        <ThemeToggle
-          size={isMobile ? 'sm' : 'md'}
-          variant="outline"
-          className="transition-all duration-200 hover:scale-105"
-        />
       </div>
     </div>
   );
