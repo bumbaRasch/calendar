@@ -1,315 +1,250 @@
-Welcome to your new TanStack app!
+# 📅 Modern Calendar Application
 
-# Getting Started
+> A beautiful, feature-rich calendar application built with React, TypeScript, and modern web
+> technologies.
 
-To run this application:
+[![Live Demo](https://img.shields.io/badge/🚀%20Live%20Demo-Visit%20Now-blue?style=for-the-badge)](https://bumbarasch.github.io/calendar/)
+[![GitHub](https://img.shields.io/badge/⭐%20Star%20on-GitHub-black?style=for-the-badge&logo=github)](https://github.com/bumbarasch/calendar)
+
+---
+
+## ✨ Why Choose This Calendar?
+
+### 🎯 **For End Users**
+
+- **Lightning Fast**: Instant loading and smooth interactions
+- **Beautiful Design**: Clean, modern interface that adapts to your system theme
+- **Keyboard Power User**: Comprehensive keyboard shortcuts for maximum productivity
+- **Smart Search**: Advanced search with filters, categories, and intelligent highlighting
+- **Mobile Ready**: Responsive design that works perfectly on all devices
+- **Zero Learning Curve**: Intuitive interface that feels familiar from day one
+
+### 👩‍💻 **For Developers**
+
+- **Modern Stack**: React 18, TypeScript, TanStack Router & Query
+- **Production Ready**: Comprehensive error handling, accessibility, and performance optimization
+- **Extensible**: Modular architecture with clean component separation
+- **Well Tested**: Full test coverage with modern testing tools
+- **Developer Experience**: Hot reload, TypeScript intellisense, ESLint + Prettier
+
+---
+
+## 🚀 Live Demo
+
+**[📱 Try it now at bumbarasch.github.io/calendar](https://bumbarasch.github.io/calendar/)**
+
+No installation required - experience all features instantly in your browser!
+
+---
+
+## 🎬 Feature Showcase
+
+### 🎨 **Modern UI/UX**
+
+- Clean, minimalist design with attention to detail
+- Dark/Light theme support with system preference detection
+- Smooth animations and micro-interactions
+- Mobile-first responsive design
+
+### ⌨️ **Keyboard Shortcuts** _(Power User Feature)_
+
+- **Navigation**: Arrow keys, H/L, J/K for lightning-fast navigation
+- **Views**: Alt+1-4 to switch between Month, Week, Day, List views
+- **Events**: N/C to create, Del to delete, Ctrl+Click for quick edit
+- **Search**: Ctrl+F to focus search, arrow keys to navigate results
+- **Help**: Press `?` to see all shortcuts - **try it now!**
+
+### 🔍 **Intelligent Search**
+
+- Real-time search with instant results
+- Filter by categories, date ranges, and custom criteria
+- Search history with keyboard navigation
+- Visual highlighting of matching events
+
+### 📝 **Event Management**
+
+- **Rich Event Creation**: Title, description, location, attendees, categories
+- **Recurring Events**: Daily, weekly, monthly with flexible patterns
+- **Quick Actions**: Right-click or Ctrl+click for instant editing
+- **Bulk Operations**: Select and manage multiple events at once
+- **Categories**: Color-coded organization with filtering
+
+### 🔄 **Recurring Events**
+
+- Flexible recurrence patterns (daily, weekly, monthly)
+- Smart handling of exceptions and modifications
+- Edit single occurrence vs. entire series
+- Visual indicators for recurring events
+
+### 📱 **Cross-Platform**
+
+- **Desktop**: Full-featured experience with keyboard shortcuts
+- **Mobile**: Touch-optimized interface with gesture support
+- **Tablet**: Adaptive layout that maximizes screen real estate
+
+---
+
+## 🛠️ Technical Excellence
+
+### **Performance**
+
+- ⚡ **Sub-second loading**: Optimized bundle splitting and lazy loading
+- 🎯 **Smooth 60fps**: Efficient rendering and state management
+- 📦 **Small footprint**: Minimal dependencies, maximum performance
+
+### **Accessibility**
+
+- ♿ **WCAG 2.1 AA compliant**: Full keyboard navigation and screen reader support
+- 🎨 **High contrast**: Optimized color schemes for visibility
+- 📝 **Semantic HTML**: Proper ARIA labels and roles
+
+### **Developer Experience**
+
+- 🔧 **Modern tooling**: Vite, TypeScript, ESLint, Prettier
+- 🧪 **Comprehensive testing**: Unit, integration, and E2E tests
+- 📚 **Well documented**: Clean code with extensive documentation
+- 🔄 **CI/CD ready**: Automated testing and deployment workflows
+
+---
+
+## 🏃 Quick Start
+
+### For Users
+
+Just visit [bumbarasch.github.io/calendar](https://bumbarasch.github.io/calendar/) - no installation
+needed!
+
+### For Developers
 
 ```bash
+# Clone the repository
+git clone https://github.com/bumbarasch/calendar.git
+cd calendar
+
+# Install dependencies
 npm install
-npm run start
+
+# Start development server
+npm run dev
+
+# Open http://localhost:5173
 ```
 
-# Building For Production
-
-To build this application for production:
+### Additional Commands
 
 ```bash
+# Build for production
 npm run build
-```
 
-## Testing
-
-This project uses [Vitest](https://vitest.dev/) for testing. You can run the tests with:
-
-```bash
+# Run tests
 npm run test
-```
 
-## Styling
+# Type checking
+npm run type-check
 
-This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
-
-## Linting & Formatting
-
-This project uses [eslint](https://eslint.org/) and [prettier](https://prettier.io/) for linting and
-formatting. Eslint is configured using
-[tanstack/eslint-config](https://tanstack.com/config/latest/docs/eslint). The following scripts are
-available:
-
-```bash
+# Linting and formatting
 npm run lint
 npm run format
-npm run check
 ```
 
-## Routing
-
-This project uses [TanStack Router](https://tanstack.com/router). The initial setup is a file based
-router. Which means that the routes are managed as files in `src/routes`.
-
-### Adding A Route
-
-To add a new route to your application just add another a new file in the `./src/routes` directory.
+---
 
-TanStack will automatically generate the content of the route file for you.
+## 🏗️ Architecture
 
-Now that you have two routes you can use a `Link` component to navigate between them.
+### **Tech Stack**
 
-### Adding Links
+- **Frontend**: React 18, TypeScript, Tailwind CSS
+- **Routing**: TanStack Router (File-based routing)
+- **State**: Zustand for state management
+- **Data Fetching**: TanStack Query for server state
+- **Calendar Engine**: FullCalendar with custom extensions
+- **Build**: Vite with modern optimizations
+- **Testing**: Vitest + React Testing Library
 
-To use SPA (Single Page Application) navigation you will need to import the `Link` component from
-`@tanstack/react-router`.
+### **Key Features**
 
-```tsx
-import { Link } from '@tanstack/react-router';
-```
+- 📦 **Component-based architecture** with clean separation of concerns
+- 🔄 **Reactive state management** with automatic UI updates
+- 🎯 **Type-safe development** with full TypeScript coverage
+- 🧪 **Comprehensive testing** with unit and integration tests
+- ♿ **Accessibility first** with WCAG compliance
+- 📱 **Mobile responsive** with touch-optimized interactions
 
-Then anywhere in your JSX you can use it like so:
+---
 
-```tsx
-<Link to="/about">About</Link>
-```
+## 🤝 Perfect For
 
-This will create a link that will navigate to the `/about` route.
+### **Personal Use**
 
-More information on the `Link` component can be found in the
-[Link documentation](https://tanstack.com/router/v1/docs/framework/react/api/router/linkComponent).
+- Daily planning and organization
+- Project deadline tracking
+- Habit tracking and goal setting
+- Family and social event management
 
-### Using A Layout
+### **Business Use**
 
-In the File Based Routing setup the layout is located in `src/routes/__root.tsx`. Anything you add
-to the root route will appear in all the routes. The route content will appear in the JSX where you
-use the `<Outlet />` component.
+- Team meeting coordination
+- Project milestone tracking
+- Resource scheduling
+- Client appointment management
 
-Here is an example layout that includes a header:
+### **Development Teams**
 
-```tsx
-import { Outlet, createRootRoute } from '@tanstack/react-router';
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
+- Sprint planning and retrospectives
+- Release scheduling
+- Team availability tracking
+- Code review scheduling
 
-import { Link } from '@tanstack/react-router';
+---
 
-export const Route = createRootRoute({
-  component: () => (
-    <>
-      <header>
-        <nav>
-          <Link to="/">Home</Link>
-          <Link to="/about">About</Link>
-        </nav>
-      </header>
-      <Outlet />
-      <TanStackRouterDevtools />
-    </>
-  ),
-});
-```
+## 📈 Roadmap
 
-The `<TanStackRouterDevtools />` component is not required so you can remove it if you don't want it
-in your layout.
+### **Coming Soon**
 
-More information on layouts can be found in the
-[Layouts documentation](https://tanstack.com/router/latest/docs/framework/react/guide/routing-concepts#layouts).
+- [ ] **Team Collaboration**: Share calendars and coordinate with team members
+- [ ] **Integrations**: Google Calendar, Outlook, Apple Calendar sync
+- [ ] **Advanced Recurring**: More complex patterns and exceptions
+- [ ] **Notifications**: Email and push notification system
+- [ ] **Analytics**: Usage insights and productivity metrics
+- [ ] **Themes**: Custom color schemes and personalization
+- [ ] **Offline Mode**: PWA support with offline functionality
 
-## Data Fetching
+### **Long Term**
 
-There are multiple ways to fetch data in your application. You can use TanStack Query to fetch data
-from a server. But you can also use the `loader` functionality built into TanStack Router to load
-the data for a route before it's rendered.
+- [ ] **AI Assistant**: Smart scheduling and conflict resolution
+- [ ] **API**: RESTful API for integrations
+- [ ] **Mobile Apps**: Native iOS and Android applications
+- [ ] **Enterprise Features**: SSO, advanced permissions, audit logs
 
-For example:
+---
 
-```tsx
-const peopleRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/people',
-  loader: async () => {
-    const response = await fetch('https://swapi.dev/api/people');
-    return response.json() as Promise<{
-      results: {
-        name: string;
-      }[];
-    }>;
-  },
-  component: () => {
-    const data = peopleRoute.useLoaderData();
-    return (
-      <ul>
-        {data.results.map((person) => (
-          <li key={person.name}>{person.name}</li>
-        ))}
-      </ul>
-    );
-  },
-});
-```
+## 📄 License
 
-Loaders simplify your data fetching logic dramatically. Check out more information in the
-[Loader documentation](https://tanstack.com/router/latest/docs/framework/react/guide/data-loading#loader-parameters).
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-### React-Query
+---
 
-React-Query is an excellent addition or alternative to route loading and integrating it into you
-application is a breeze.
+## 🙏 Support & Feedback
 
-First add your dependencies:
+- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/bumbarasch/calendar/issues)
+- 💡 **Feature Requests**: [GitHub Discussions](https://github.com/bumbarasch/calendar/discussions)
+- ⭐ **Like this project?** Star it on GitHub!
+- 🔗 **Share**: Help others discover this calendar
 
-```bash
-npm install @tanstack/react-query @tanstack/react-query-devtools
-```
+---
 
-Next we'll need to create a query client and provider. We recommend putting those in `main.tsx`.
+## 🎉 Try It Now!
 
-```tsx
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+**[📅 Open Calendar Application](https://bumbarasch.github.io/calendar/)**
 
-// ...
+Experience the future of calendar management - modern, fast, and beautifully designed.
 
-const queryClient = new QueryClient();
+---
 
-// ...
+<div align="center">
 
-if (!rootElement.innerHTML) {
-  const root = ReactDOM.createRoot(rootElement);
+**Made with ❤️ by [bumbarasch](https://github.com/bumbarasch)**
 
-  root.render(
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>,
-  );
-}
-```
+_Star ⭐ this repo if you found it helpful!_
 
-You can also add TanStack Query Devtools to the root route (optional).
-
-```tsx
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-
-const rootRoute = createRootRoute({
-  component: () => (
-    <>
-      <Outlet />
-      <ReactQueryDevtools buttonPosition="top-right" />
-      <TanStackRouterDevtools />
-    </>
-  ),
-});
-```
-
-Now you can use `useQuery` to fetch your data.
-
-```tsx
-import { useQuery } from '@tanstack/react-query';
-
-import './App.css';
-
-function App() {
-  const { data } = useQuery({
-    queryKey: ['people'],
-    queryFn: () =>
-      fetch('https://swapi.dev/api/people')
-        .then((res) => res.json())
-        .then((data) => data.results as { name: string }[]),
-    initialData: [],
-  });
-
-  return (
-    <div>
-      <ul>
-        {data.map((person) => (
-          <li key={person.name}>{person.name}</li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-export default App;
-```
-
-You can find out everything you need to know on how to use React-Query in the
-[React-Query documentation](https://tanstack.com/query/latest/docs/framework/react/overview).
-
-## State Management
-
-Another common requirement for React applications is state management. There are many options for
-state management in React. TanStack Store provides a great starting point for your project.
-
-First you need to add TanStack Store as a dependency:
-
-```bash
-npm install @tanstack/store
-```
-
-Now let's create a simple counter in the `src/App.tsx` file as a demonstration.
-
-```tsx
-import { useStore } from '@tanstack/react-store';
-import { Store } from '@tanstack/store';
-import './App.css';
-
-const countStore = new Store(0);
-
-function App() {
-  const count = useStore(countStore);
-  return (
-    <div>
-      <button onClick={() => countStore.setState((n) => n + 1)}>Increment - {count}</button>
-    </div>
-  );
-}
-
-export default App;
-```
-
-One of the many nice features of TanStack Store is the ability to derive state from other state.
-That derived state will update when the base state updates.
-
-Let's check this out by doubling the count using derived state.
-
-```tsx
-import { useStore } from '@tanstack/react-store';
-import { Store, Derived } from '@tanstack/store';
-import './App.css';
-
-const countStore = new Store(0);
-
-const doubledStore = new Derived({
-  fn: () => countStore.state * 2,
-  deps: [countStore],
-});
-doubledStore.mount();
-
-function App() {
-  const count = useStore(countStore);
-  const doubledCount = useStore(doubledStore);
-
-  return (
-    <div>
-      <button onClick={() => countStore.setState((n) => n + 1)}>Increment - {count}</button>
-      <div>Doubled - {doubledCount}</div>
-    </div>
-  );
-}
-
-export default App;
-```
-
-We use the `Derived` class to create a new store that is derived from another store. The `Derived`
-class has a `mount` method that will start the derived store updating.
-
-Once we've created the derived store we can use it in the `App` component just like we would any
-other store using the `useStore` hook.
-
-You can find out everything you need to know on how to use TanStack Store in the
-[TanStack Store documentation](https://tanstack.com/store/latest).
-
-# Demo files
-
-Files prefixed with `demo` can be safely deleted. They are there to provide a starting point for you
-to play around with the features you've installed.
-
-# Learn More
-
-You can learn more about all of the offerings from TanStack in the
-[TanStack documentation](https://tanstack.com).
+</div>
