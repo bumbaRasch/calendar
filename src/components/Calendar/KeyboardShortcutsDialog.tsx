@@ -186,10 +186,9 @@ export const KeyboardShortcutsDialog: React.FC<
       style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
       onClick={onClose}
       onKeyDown={(e) => e.key === 'Enter' && onClose()}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="shortcuts-dialog-title"
-      tabIndex={-1}
+      role="button"
+      aria-label="Close dialog"
+      tabIndex={0}
     >
       <div
         className={cn(
@@ -202,6 +201,9 @@ export const KeyboardShortcutsDialog: React.FC<
         }}
         onClick={(e) => e.stopPropagation()}
         onKeyDown={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="shortcuts-dialog-title"
       >
         {/* Header */}
         <div
@@ -251,6 +253,7 @@ export const KeyboardShortcutsDialog: React.FC<
         <div
           className="overflow-y-auto p-6"
           style={{ maxHeight: 'calc(90vh - 120px)' }}
+          role="document"
         >
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {shortcutGroups.map((group) => (
