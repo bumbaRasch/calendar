@@ -52,7 +52,7 @@ No installation required - experience all features instantly in your browser!
 - **Views**: Alt+1-4 to switch between Month, Week, Day, List views
 - **Events**: N/C to create, Del to delete, Ctrl+Click for quick edit
 - **Search**: Ctrl+F to focus search, arrow keys to navigate results
-- **Help**: Press `?` to see all shortcuts - **try it now!**
+- **Help**: Press `shift` `+``?` to see all shortcuts - **try it now!**
 
 ### 🔍 **Intelligent Search**
 
