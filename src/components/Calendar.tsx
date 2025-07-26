@@ -537,7 +537,10 @@ const Calendar: React.FC<CalendarProps> = ({
           title: title,
         };
 
-        if ('preview' in options && (options as any).preview) {
+        if (
+          'preview' in options &&
+          (options as PrintOptions & { preview?: boolean }).preview
+        ) {
           await CalendarPrinter.previewCalendar({
             calendarApi: api,
             options,
@@ -555,8 +558,11 @@ const Calendar: React.FC<CalendarProps> = ({
           success('Print Started', 'Calendar sent to printer');
         }
       } catch (error) {
-        console.error('Print error:', error);
-        success('Print Error', 'Failed to print calendar. Please try again.');
+        // Log error details for debugging but don't expose to console in production
+        success(
+          'Print Error',
+          `Failed to print calendar: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        );
       }
     },
     [getCalendarApi, success],

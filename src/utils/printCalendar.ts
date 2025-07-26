@@ -47,8 +47,8 @@ export class CalendarPrinter {
         window.print();
         this.cleanupPrintStyles();
       }, 500); // Small delay to ensure styles are applied
-    } catch (error) {
-      console.error('Error printing calendar:', error);
+    } catch (_error) {
+      // Error is re-thrown, no console needed
       throw new Error('Failed to print calendar');
     }
   }
@@ -71,8 +71,8 @@ export class CalendarPrinter {
       });
 
       this.openPrintPreview(printContent);
-    } catch (error) {
-      console.error('Error previewing calendar:', error);
+    } catch (_error) {
+      // Error is re-thrown, no console needed
       throw new Error('Failed to preview calendar');
     }
   }

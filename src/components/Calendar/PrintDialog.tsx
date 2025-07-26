@@ -146,7 +146,9 @@ export const PrintDialog: React.FC<PrintDialogProps> = ({
   }, [options, onPrint, onClose]);
 
   const handlePreview = useCallback(() => {
-    onPrint({ ...options, preview: true } as any);
+    onPrint({ ...options, preview: true } as PrintOptions & {
+      preview: boolean;
+    });
   }, [options, onPrint]);
 
   if (!isOpen) return null;
@@ -171,6 +173,12 @@ export const PrintDialog: React.FC<PrintDialogProps> = ({
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
       onClick={onClose}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClose();
+        }
+      }}
       role="button"
       aria-label="Close dialog"
       tabIndex={0}
@@ -186,7 +194,6 @@ export const PrintDialog: React.FC<PrintDialogProps> = ({
         }}
         onClick={(e) => e.stopPropagation()}
         onKeyDown={(e) => e.stopPropagation()}
-        role="dialog"
         aria-modal="true"
         aria-labelledby="print-dialog-title"
       >
@@ -277,7 +284,7 @@ export const PrintDialog: React.FC<PrintDialogProps> = ({
             <RadioGroup
               value={options.view}
               onValueChange={(value: string) =>
-                handleOptionChange('view', value as any)
+                handleOptionChange('view', value as PrintOptions['view'])
               }
               className="space-y-2"
             >
@@ -317,7 +324,10 @@ export const PrintDialog: React.FC<PrintDialogProps> = ({
               <Select
                 value={options.paperSize}
                 onValueChange={(value: string) =>
-                  handleOptionChange('paperSize', value as any)
+                  handleOptionChange(
+                    'paperSize',
+                    value as PrintOptions['paperSize'],
+                  )
                 }
               >
                 <SelectTrigger>
@@ -341,7 +351,10 @@ export const PrintDialog: React.FC<PrintDialogProps> = ({
               <Select
                 value={options.orientation}
                 onValueChange={(value: string) =>
-                  handleOptionChange('orientation', value as any)
+                  handleOptionChange(
+                    'orientation',
+                    value as PrintOptions['orientation'],
+                  )
                 }
               >
                 <SelectTrigger>

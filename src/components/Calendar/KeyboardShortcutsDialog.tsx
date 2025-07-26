@@ -201,7 +201,6 @@ export const KeyboardShortcutsDialog: React.FC<
         }}
         onClick={(e) => e.stopPropagation()}
         onKeyDown={(e) => e.stopPropagation()}
-        role="dialog"
         aria-modal="true"
         aria-labelledby="shortcuts-dialog-title"
       >

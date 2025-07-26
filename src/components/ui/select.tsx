@@ -94,7 +94,18 @@ export const SelectContent: React.FC<{
 
   return (
     <>
-      <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+      <div
+        className="fixed inset-0 z-40"
+        onClick={() => setIsOpen(false)}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') {
+            setIsOpen(false);
+          }
+        }}
+        role="button"
+        tabIndex={-1}
+        aria-label="Close dropdown"
+      />
       <div
         className={cn(
           'absolute z-50 min-w-[8rem] overflow-hidden rounded-md border',
@@ -116,7 +127,7 @@ export const SelectItem: React.FC<{
   children: React.ReactNode;
   className?: string;
 }> = ({ value, children, className }) => {
-  const { onValueChange, setIsOpen } = useSelectContext();
+  const { value: selectedValue, onValueChange, setIsOpen } = useSelectContext();
 
   const handleSelect = () => {
     onValueChange?.(value);
@@ -125,6 +136,15 @@ export const SelectItem: React.FC<{
 
   return (
     <div
+      role="option"
+      aria-selected={selectedValue === value}
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleSelect();
+        }
+      }}
       className={cn(
         'relative flex w-full cursor-default select-none items-center',
         'rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none',
