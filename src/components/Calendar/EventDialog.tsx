@@ -228,45 +228,53 @@ export const EventDialog: React.FC<EventDialogProps> = ({
 
     switch (field) {
       case 'title':
-        if (!value.trim()) {
-          newErrors.title = 'Event title is required';
-        } else if (value.trim().length > 200) {
-          newErrors.title = 'Event title must be less than 200 characters';
-        } else {
-          delete newErrors.title;
+        if (typeof value === 'string') {
+          if (!value.trim()) {
+            newErrors.title = 'Event title is required';
+          } else if (value.trim().length > 200) {
+            newErrors.title = 'Event title must be less than 200 characters';
+          } else {
+            delete newErrors.title;
+          }
         }
         break;
 
       case 'url':
-        if (value && value.trim() && !isValidUrl(value.trim())) {
-          newErrors.url =
-            'Please enter a valid URL (e.g., https://example.com)';
-        } else {
-          delete newErrors.url;
+        if (typeof value === 'string') {
+          if (value && value.trim() && !isValidUrl(value.trim())) {
+            newErrors.url =
+              'Please enter a valid URL (e.g., https://example.com)';
+          } else {
+            delete newErrors.url;
+          }
         }
         break;
 
       case 'description':
-        if (value && value.length > 1000) {
-          newErrors.description =
-            'Description must be less than 1000 characters';
-        } else {
-          delete newErrors.description;
+        if (typeof value === 'string') {
+          if (value && value.length > 1000) {
+            newErrors.description =
+              'Description must be less than 1000 characters';
+          } else {
+            delete newErrors.description;
+          }
         }
         break;
 
       case 'location':
-        if (value && value.length > 200) {
-          newErrors.location = 'Location must be less than 200 characters';
-        } else {
-          delete newErrors.location;
+        if (typeof value === 'string') {
+          if (value && value.length > 200) {
+            newErrors.location = 'Location must be less than 200 characters';
+          } else {
+            delete newErrors.location;
+          }
         }
         break;
 
       case 'end':
         if (value && formData.start) {
           const startDate = new Date(formData.start);
-          const endDate = new Date(value);
+          const endDate = new Date(value as string | number | Date);
 
           if (endDate <= startDate) {
             newErrors.end = 'End date must be after start date';

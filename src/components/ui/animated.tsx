@@ -24,7 +24,11 @@ interface AnimatedProps {
     | 'slideInUp'
     | 'slideInDown'
     | 'slideInLeft'
-    | 'slideInRight';
+    | 'slideInRight'
+    | 'fadeInUp'
+    | 'fadeInDown'
+    | 'fadeInLeft'
+    | 'fadeInRight';
   duration?: number;
   delay?: number;
   easing?: string;
@@ -106,12 +110,16 @@ const getAnimationTransform = (
       case 'scaleOut':
         return 'scale(1.2)';
       case 'slideInUp':
+      case 'fadeInUp':
         return 'translateY(20px)';
       case 'slideInDown':
+      case 'fadeInDown':
         return 'translateY(-20px)';
       case 'slideInLeft':
+      case 'fadeInLeft':
         return 'translateX(-20px)';
       case 'slideInRight':
+      case 'fadeInRight':
         return 'translateX(20px)';
       default:
         return 'none';
